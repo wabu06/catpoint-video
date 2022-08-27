@@ -164,10 +164,10 @@ public class ImagePanel extends JPanel implements StatusListener
     public void notify(AlarmStatus status) {} //no behavior necessary
 
     @Override
-    public void catDetected(boolean catDetected)
+    public void catDetected(boolean catDetected, String sensor)
 	{
         if(catDetected)
-            cameraHeader.setText("DANGER - CAT DETECTED");
+            cameraHeader.setText("DANGER - CAT DETECTED - " + sensor);
         else
             cameraHeader.setText("Camera Feed - No Cats Detected");
     }

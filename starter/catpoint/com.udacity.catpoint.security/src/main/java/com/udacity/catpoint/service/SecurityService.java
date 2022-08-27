@@ -11,6 +11,7 @@ import com.udacity.image.service.*;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Random;
 
 import com.google.inject.Guice;
 import javax.inject.Inject;
@@ -29,6 +30,8 @@ public class SecurityService
 	
     private SecurityRepository securityRepository;
     private Set<StatusListener> statusListeners = new HashSet<>();
+    
+    private Random RNG = new Random();
 
 	@Inject
 	public SecurityService(SecurityRepository securityRepository, ImageService imageService)
@@ -50,13 +53,77 @@ public class SecurityService
         if(armingStatus == ArmingStatus.DISARMED)
         	setAlarmStatus(AlarmStatus.NO_ALARM);
 		
-		if(armingStatus != ArmingStatus.DISARMED)
+		/*if(armingStatus != ArmingStatus.DISARMED)
+		{
 			getSensors().forEach( s -> s.setActive(Boolean.FALSE) );
+			statusListeners.forEach( sl -> sl.sensorStatusChanged() );
+		}*/
 
         securityRepository.setArmingStatus(armingStatus);
 		
 		//if( armingStatus == ArmingStatus.ARMED_HOME )
 			//processImage( getCurrentCameraImage() );
+    }
+    
+    private void handleCatDetectedArmedHome(Boolean cat)
+    {
+    	Sensor randSensor;
+        String sensorTypeName = "";
+        
+    	setAlarmStatus(AlarmStatus.ALARM);
+            
+    	Object[] sensors = getSensors().stream().filter( s -> s.getActive() ).toArray();
+            
+        if( sensors.length > 0 )
+        {
+            	randSensor = (Sensor) sensors[ RNG.nextInt(sensors.length) ];
+            	sensorTypeName = randSensor.getSensorType().toString();
+        }
+    	
+    		// this is done to satisfy effectively final requirement for lamdas
+   		String finalSensorTypeName = sensorTypeName;
+   		statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
+    }
+    
+    private void handleCatDetectedArmedAway(Boolean cat)
+    {
+    	Sensor randSensor;
+        String sensorTypeName = "";
+        
+    	Object[] sensors = getSensors().stream().filter( s -> s.getActive() ).toArray();
+            
+        if( sensors.length > 0 )
+        {
+            	setAlarmStatus(AlarmStatus.ALARM);
+            	randSensor = (Sensor) sensors[ RNG.nextInt(sensors.length) ];
+            	sensorTypeName = randSensor.getSensorType().toString();
+        }
+        else
+        	setAlarmStatus(AlarmStatus.PENDING_ALARM);
+    
+    		// this is done to satisfy effectively final requirement for lamdas
+        String finalSensorTypeName = sensorTypeName;
+        statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
+    }
+    
+    private void handleCatDetectedDisarmed(Boolean cat)
+    {
+    	setAlarmStatus(AlarmStatus.NO_ALARM);
+    	
+    	Sensor randSensor;
+        String sensorTypeName = "";
+        
+    	Object[] sensors = getSensors().stream().filter( s -> s.getActive() ).toArray();
+	
+		if( sensors.length > 0 )
+		{
+			randSensor = (Sensor) sensors[ RNG.nextInt(sensors.length) ];
+    		sensorTypeName = randSensor.getSensorType().toString();
+    	}
+    
+    		// this is done to satisfy effectively final requirement for lamdas
+    	String finalSensorTypeName = sensorTypeName;
+    	statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
     }
 
     /**
@@ -66,17 +133,28 @@ public class SecurityService
      */
     private void catDetected(Boolean cat)
 	{
-        if( cat && getArmingStatus() == ArmingStatus.ARMED_HOME )
-            setAlarmStatus(AlarmStatus.ALARM);
+        if(cat)
+        {
+        	switch( getArmingStatus() )
+        	{
+            	case ARMED_HOME:
+            		handleCatDetectedArmedHome(cat);
+            	break;
+            	
+            	case ARMED_AWAY:
+            		handleCatDetectedArmedAway(cat);
+            	break;
+            	
+            	case DISARMED:
+            		handleCatDetectedDisarmed(cat);
+            	break;
+            }
+        }
         else
-		{
-         	boolean active = getSensors().stream().anyMatch( s -> s.getActive().booleanValue()  );
-            
-            if( !active )
-            	setAlarmStatus(AlarmStatus.NO_ALARM);
-		}
-
-        statusListeners.forEach(sl -> sl.catDetected(cat));
+        {
+        	setAlarmStatus(AlarmStatus.NO_ALARM);
+        	statusListeners.forEach( sl -> sl.catDetected(cat, "") );
+        }
     }
 
     /**
@@ -117,8 +195,10 @@ public class SecurityService
     /**
      * Internal method for updating the alarm status when a sensor has been deactivated
      */
-    private void handleSensorDeactivated() {
-        switch(securityRepository.getAlarmStatus()) {
+    private void handleSensorDeactivated()
+    {
+        switch(securityRepository.getAlarmStatus())
+        {
             case PENDING_ALARM: /* PENDING_ALARM -> */ setAlarmStatus(AlarmStatus.NO_ALARM);
             	//break;
 			//case ALARM: /* ALARM -> */ setAlarmStatus(AlarmStatus.PENDING_ALARM);
@@ -130,12 +210,13 @@ public class SecurityService
      * @param sensor
      * @param active
      */
-    public void changeSensorActivationStatus(Sensor sensor, Boolean active) {
-        if(!sensor.getActive() && active) {
+    public void changeSensorActivationStatus(Sensor sensor, Boolean active)
+    {
+        /*if(!sensor.getActive() && active) {
             handleSensorActivated();
         } else if (sensor.getActive() && !active) {
             handleSensorDeactivated();
-        }
+        }*/
         sensor.setActive(active);
         securityRepository.updateSensor(sensor);
     }
@@ -145,7 +226,16 @@ public class SecurityService
      * ImageService to analyze the image for cats and update the alarm status accordingly.
      * @param currentCameraImage
      */
-    public void processImage(BufferedImage currentCameraImage) {
+    public void processImage(BufferedImage currentCameraImage)
+    {
+    	if( getArmingStatus() == ArmingStatus.DISARMED )
+		{   
+    		boolean active = getSensors().stream().anyMatch( s -> s.getActive().booleanValue()  );
+    		
+    		if(!active)
+    			return;
+    	}
+        
         catDetected(imageService.imageContainsCat(currentCameraImage, 50.0f));
     }
 

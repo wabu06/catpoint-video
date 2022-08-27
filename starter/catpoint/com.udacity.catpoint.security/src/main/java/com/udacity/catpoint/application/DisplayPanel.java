@@ -43,7 +43,7 @@ public class DisplayPanel extends JPanel implements StatusListener {
     }
 
     @Override
-    public void catDetected(boolean catDetected) {
+    public void catDetected(boolean catDetected, String sensor) {
         // no behavior necessary
     }
 

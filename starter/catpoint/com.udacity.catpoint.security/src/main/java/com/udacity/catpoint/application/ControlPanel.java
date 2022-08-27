@@ -47,7 +47,7 @@ public class ControlPanel extends JPanel {
                 securityService.setArmingStatus(k);
                 buttonMap.forEach((status, button) -> button.setBackground(status == k ? status.getColor() : null));
 				
-				sensors.extUpdateSensorList();
+				//sensors.extUpdateSensorList();
 				
 				if( k == ArmingStatus.ARMED_HOME )
 					securityService.processImage( image.getCurrentCameraImage() );
