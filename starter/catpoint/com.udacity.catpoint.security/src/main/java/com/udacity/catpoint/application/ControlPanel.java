@@ -44,13 +44,17 @@ public class ControlPanel extends JPanel {
 		{
             v.addActionListener(e ->
 			{
+                buttonMap.get( securityService.getArmingStatus() ).setEnabled(true);
+                
                 securityService.setArmingStatus(k);
                 buttonMap.forEach((status, button) -> button.setBackground(status == k ? status.getColor() : null));
 				
 				//sensors.extUpdateSensorList();
 				
+				v.setEnabled(false);
+				
 				if( k == ArmingStatus.ARMED_HOME )
-					securityService.processImage( image.getCurrentCameraImage() );
+					securityService.processImage( securityService.getCurrentImage() );
             });
         });
 
@@ -58,6 +62,8 @@ public class ControlPanel extends JPanel {
         Arrays.stream(ArmingStatus.values()).forEach(status -> add(buttonMap.get(status)));
 
         ArmingStatus currentStatus = securityService.getArmingStatus();
-        buttonMap.get(currentStatus).setBackground(currentStatus.getColor());
+        
+        buttonMap.get(currentStatus).setBackground( currentStatus.getColor() );
+        buttonMap.get(currentStatus).setEnabled(false);
     }
 }

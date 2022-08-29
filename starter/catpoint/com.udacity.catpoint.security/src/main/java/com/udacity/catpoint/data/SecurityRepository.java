@@ -2,10 +2,14 @@ package com.udacity.catpoint.data;
 
 import java.util.Set;
 
+import java.awt.image.BufferedImage;
+
+
 /**
  * Interface showing the methods our security repository will need to support
  */
-public interface SecurityRepository {
+public interface SecurityRepository
+{
     void addSensor(Sensor sensor);
     void removeSensor(Sensor sensor);
     void updateSensor(Sensor sensor);
@@ -14,6 +18,6 @@ public interface SecurityRepository {
     Set<Sensor> getSensors();
     AlarmStatus getAlarmStatus();
     ArmingStatus getArmingStatus();
-
-
+	void setCurrentImage(BufferedImage currentCameraImage);
+	BufferedImage getCurrentImage();
 }

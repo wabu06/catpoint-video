@@ -1,6 +1,6 @@
 package com.udacity.catpoint.application;
 
-import com.udacity.catpoint.data.AlarmStatus;
+import com.udacity.catpoint.data.*;
 import com.udacity.catpoint.service.SecurityService;
 import com.udacity.catpoint.service.StyleService;
 
@@ -41,6 +41,8 @@ public class ImagePanel extends JPanel implements StatusListener
 
     private int IMAGE_WIDTH = 300;
     private int IMAGE_HEIGHT = 225;
+    
+    boolean autoScan = false;
 
     public ImagePanel(SecurityService securityService)
 	{
@@ -61,18 +63,50 @@ public class ImagePanel extends JPanel implements StatusListener
         	//button allowing users to select a file to be the current camera image
         JButton refreshButton = new JButton("Refresh Camera");
 		
-        refreshButton.addActionListener( e -> { showRandImage(); /* securityService.processImage(currentCameraImage); */ } );
-
+        refreshButton.addActionListener(e -> {
+        										showRandImage();
+        										cameraHeader.setText("Camera Feed");
+        										
+        										if( securityService.getArmingStatus() != ArmingStatus.DISARMED )
+        										{
+        											securityService.setAlarmStatus(AlarmStatus.PENDING_ALARM);
+        											
+        											if(autoScan)
+        												securityService.processImage(currentCameraImage);
+        										}
+        									});
+        
         	//button that sends the image to the image service
         JButton scanPictureButton = new JButton("Scan Picture");
         scanPictureButton.addActionListener( e -> securityService.processImage(currentCameraImage) );
-
+        
+        JButton autoScanButton = new JButton("Auto Scan Off");
+        autoScanButton.addActionListener( e -> { //autoScan = autoScan ? false: true;
+        											if(autoScan)
+        											{	
+        												autoScan = false;
+        												scanPictureButton.setEnabled(true);
+        												autoScanButton.setBackground(null);
+        												autoScanButton.setText("Auto Scan Off");
+        												autoScanButton.setForeground​(Color.black);
+        											}
+        											else
+        											{
+        												autoScan = true;
+        												scanPictureButton.setEnabled(false);
+        												//autoScanButton.setBackground(Color.orange);
+        												autoScanButton.setBackground( new Color(0x191970) ); // midnight blue
+        												autoScanButton.setText("Auto Scan On");
+        												autoScanButton.setForeground​(Color.white);
+        											}
+        										});
         getImageFileNames();
 		
 		add(cameraHeader, "span 3, wrap");
         add(cameraLabel, "span 3, wrap");
         add(refreshButton);
         add(scanPictureButton);
+        add(autoScanButton);
 		
 		idx = RNG.nextInt( fileNames.size() );
 		
@@ -106,6 +140,8 @@ public class ImagePanel extends JPanel implements StatusListener
 
 			System.exit(1);
 		}
+		
+		securityService.setCurrentImage(currentCameraImage);
 		
 		Image tmp = new ImageIcon(currentCameraImage).getImage();
 		
@@ -164,16 +200,27 @@ public class ImagePanel extends JPanel implements StatusListener
     public void notify(AlarmStatus status) {} //no behavior necessary
 
     @Override
-    public void catDetected(boolean catDetected, String sensor)
+    public void catDetected(boolean catDetected, Object[] sensors)
 	{
         if(catDetected)
-            cameraHeader.setText("DANGER - CAT DETECTED - " + sensor);
+        {
+            if( sensors.length > 0 )
+        	{
+            	Sensor randSensor = (Sensor) sensors[ RNG.nextInt(sensors.length) ];
+            	cameraHeader.setText( "DANGER - CAT DETECTED - " + randSensor.getSensorType().toString() );
+        	}
+        	else
+            	cameraHeader.setText("DANGER - CAT DETECTED");
+        }
         else
             cameraHeader.setText("Camera Feed - No Cats Detected");
     }
 
     @Override
     public void sensorStatusChanged() {} //no behavior necessary
+    
+    @Override
+    public void resetCameraHeaderMsg() { cameraHeader.setText("Camera Feed"); }
 	
 	public BufferedImage getCurrentCameraImage() { return currentCameraImage; }
 }

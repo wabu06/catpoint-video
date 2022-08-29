@@ -136,18 +136,17 @@ public class SensorPanel extends JPanel implements StatusListener
 	public void extUpdateSensorList() { updateSensorList(sensorListPanel); }
 	
 	@Override
-    public void notify(AlarmStatus status) {
-        // no behavior necessary
-    }
+    public void notify(AlarmStatus status) {} // no behavior necessary
 
     @Override
-    public void catDetected(boolean catDetected, String sensor) {
-        // no behavior necessary
-    }
+    public void catDetected(boolean catDetected, Object[] sensors) {} // no behavior necessary
 
     @Override
     public void sensorStatusChanged()
     {
         updateSensorList(sensorListPanel);
     }
+    
+    @Override
+    public void resetCameraHeaderMsg() {}
 }

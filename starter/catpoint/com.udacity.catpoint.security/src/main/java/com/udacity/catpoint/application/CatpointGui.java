@@ -54,7 +54,7 @@ public class CatpointGui extends JFrame
 		setLocation(50, 50);
         //setSize(600, 850);
 		setSize(600, 720);
-        setTitle("Very Secure App");
+        setTitle("NoCats");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		//ImageIcon icon = new ImageIcon("no-cats.jpeg");

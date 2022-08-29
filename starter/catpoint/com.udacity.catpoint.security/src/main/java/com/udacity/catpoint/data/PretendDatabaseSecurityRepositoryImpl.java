@@ -8,16 +8,21 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
 
+import java.awt.image.BufferedImage;
+
+
 /**
  * Fake repository implementation for demo purposes. Stores state information in local
  * memory and writes it to user preferences between app loads. This implementation is
  * intentionally a little hard to use in unit tests, so watch out!
  */
-public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository{
-
+public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
+{
     private Set<Sensor> sensors;
     private AlarmStatus alarmStatus;
     private ArmingStatus armingStatus;
+    
+    private BufferedImage currentCameraImage;
 
     //preference keys
     private static final String SENSORS = "SENSORS";
@@ -96,4 +101,10 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     public ArmingStatus getArmingStatus() {
         return armingStatus;
     }
+    
+    @Override
+    public void setCurrentImage(BufferedImage currentCameraImage) { this.currentCameraImage = currentCameraImage;}
+    
+    @Override
+    public BufferedImage getCurrentImage() { return currentCameraImage; }
 }

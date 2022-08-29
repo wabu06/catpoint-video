@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class AwsImageService implements ImageService
 {
 
-    private Logger log = LoggerFactory.getLogger(AwsImageService.class);
+    //private Logger log = LoggerFactory.getLogger(AwsImageService.class);
 
     //aws recommendation is to maintain only a single instance of client objects
     private static RekognitionClient rekognitionClient;
@@ -88,16 +88,22 @@ public class AwsImageService implements ImageService
             return false;
         }
 		
+		confidenceThreshhold += 30.0;
+		
         DetectLabelsRequest detectLabelsRequest = DetectLabelsRequest.builder().image(awsImage).minConfidence(confidenceThreshhold).build();
         DetectLabelsResponse response = rekognitionClient.detectLabels(detectLabelsRequest);
         logLabelsForFun(response);
-        return response.labels().stream().filter(l -> l.name().toLowerCase().contains("cat")).findFirst().isPresent();
+        
+        //return response.labels().stream().filter(l -> l.name().toLowerCase().contains("cat")).findFirst().isPresent();
+        //return response.labels().stream().filter( l -> l.name().equalsIgnoreCase​("cat") ).findFirst().isPresent();
+        
+		return response.labels().stream().anyMatch( l -> l.name().equalsIgnoreCase​("cat") );
     }
 
     private void logLabelsForFun(DetectLabelsResponse response)
 	{
         log.info(response.labels().stream()
                 .map(label -> String.format("%s(%.1f%%)", label.name(), label.confidence()))
-                .collect(Collectors.joining(", ")));
+                .collect(Collectors.joining(", ")) + "\n");
     }
 }

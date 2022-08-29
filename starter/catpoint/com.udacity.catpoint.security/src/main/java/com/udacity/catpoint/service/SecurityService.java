@@ -40,7 +40,7 @@ public class SecurityService
 
 		this.imageService = imageService;
 		
-		imageService.log.info("Using: " + imageService.getClass() );
+		imageService.log.info("Using: " + imageService.getClass() + "\n");
     }
 
     /**
@@ -50,14 +50,15 @@ public class SecurityService
      */
     public void setArmingStatus(ArmingStatus armingStatus)
 	{
-        if(armingStatus == ArmingStatus.DISARMED)
-        	setAlarmStatus(AlarmStatus.NO_ALARM);
+        //if(armingStatus == ArmingStatus.DISARMED)
+        	//setAlarmStatus(AlarmStatus.NO_ALARM);
 		
-		/*if(armingStatus != ArmingStatus.DISARMED)
+		if(armingStatus == ArmingStatus.DISARMED)
 		{
+			setAlarmStatus(AlarmStatus.NO_ALARM);
 			getSensors().forEach( s -> s.setActive(Boolean.FALSE) );
-			statusListeners.forEach( sl -> sl.sensorStatusChanged() );
-		}*/
+			statusListeners.forEach( sl -> { sl.sensorStatusChanged(); sl.resetCameraHeaderMsg(); } );
+		}
 
         securityRepository.setArmingStatus(armingStatus);
 		
@@ -76,13 +77,13 @@ public class SecurityService
             
         if( sensors.length > 0 )
         {
-            	randSensor = (Sensor) sensors[ RNG.nextInt(sensors.length) ];
-            	sensorTypeName = randSensor.getSensorType().toString();
+            randSensor = (Sensor) sensors[ RNG.nextInt(sensors.length) ];
+            sensorTypeName = randSensor.getSensorType().toString();
         }
     	
     		// this is done to satisfy effectively final requirement for lamdas
-   		String finalSensorTypeName = sensorTypeName;
-   		statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
+   		//String finalSensorTypeName = sensorTypeName;
+   		//statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
     }
     
     private void handleCatDetectedArmedAway(Boolean cat)
@@ -102,8 +103,8 @@ public class SecurityService
         	setAlarmStatus(AlarmStatus.PENDING_ALARM);
     
     		// this is done to satisfy effectively final requirement for lamdas
-        String finalSensorTypeName = sensorTypeName;
-        statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
+        //String finalSensorTypeName = sensorTypeName;
+        //statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
     }
     
     private void handleCatDetectedDisarmed(Boolean cat)
@@ -122,8 +123,8 @@ public class SecurityService
     	}
     
     		// this is done to satisfy effectively final requirement for lamdas
-    	String finalSensorTypeName = sensorTypeName;
-    	statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
+    	//String finalSensorTypeName = sensorTypeName;
+    	//statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
     }
 
     /**
@@ -133,28 +134,29 @@ public class SecurityService
      */
     private void catDetected(Boolean cat)
 	{
+		Object[] sensors = getSensors().stream().filter( s -> s.getActive() ).toArray();
+		
         if(cat)
         {
         	switch( getArmingStatus() )
         	{
             	case ARMED_HOME:
-            		handleCatDetectedArmedHome(cat);
+            		setAlarmStatus(AlarmStatus.ALARM);
             	break;
             	
             	case ARMED_AWAY:
-            		handleCatDetectedArmedAway(cat);
+            		if( sensors.length > 0 ) setAlarmStatus(AlarmStatus.ALARM); else setAlarmStatus(AlarmStatus.PENDING_ALARM);
             	break;
             	
             	case DISARMED:
-            		handleCatDetectedDisarmed(cat);
+            		setAlarmStatus(AlarmStatus.NO_ALARM);
             	break;
             }
         }
         else
-        {
         	setAlarmStatus(AlarmStatus.NO_ALARM);
-        	statusListeners.forEach( sl -> sl.catDetected(cat, "") );
-        }
+        	
+        statusListeners.forEach( sl -> sl.catDetected(cat, sensors) );
     }
 
     /**
@@ -258,4 +260,7 @@ public class SecurityService
     public ArmingStatus getArmingStatus() {
         return securityRepository.getArmingStatus();
     }
+    
+    public void setCurrentImage(BufferedImage currentCameraImage) { securityRepository.setCurrentImage(currentCameraImage); }
+	public BufferedImage getCurrentImage() { return securityRepository.getCurrentImage(); }
 }

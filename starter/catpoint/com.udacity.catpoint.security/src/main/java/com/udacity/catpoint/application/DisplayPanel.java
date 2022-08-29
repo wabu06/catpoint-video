@@ -21,7 +21,7 @@ public class DisplayPanel extends JPanel implements StatusListener {
 
         securityService.addStatusListener(this);
 
-        JLabel panelLabel = new JLabel("Very Secure Home Security");
+        JLabel panelLabel = new JLabel("The Cat Detection System");
         JLabel systemStatusLabel = new JLabel("System Status:");
         currentStatusLabel = new JLabel();
 
@@ -36,19 +36,19 @@ public class DisplayPanel extends JPanel implements StatusListener {
     }
 
     @Override
-    public void notify(AlarmStatus status) {
+    public void notify(AlarmStatus status)
+    {
         currentStatusLabel.setText(status.getDescription());
         currentStatusLabel.setBackground(status.getColor());
         currentStatusLabel.setOpaque(true);
     }
 
     @Override
-    public void catDetected(boolean catDetected, String sensor) {
-        // no behavior necessary
-    }
+    public void catDetected(boolean catDetected, Object[] sensors) {} // no behavior necessary
 
     @Override
-    public void sensorStatusChanged() {
-        // no behavior necessary
-    }
+    public void sensorStatusChanged() {} // no behavior necessary
+    
+    @Override
+    public void resetCameraHeaderMsg() {}
 }
