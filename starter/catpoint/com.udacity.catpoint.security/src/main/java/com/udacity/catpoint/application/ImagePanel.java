@@ -207,10 +207,10 @@ public class ImagePanel extends JPanel implements StatusListener
             if( sensors.length > 0 )
         	{
             	Sensor randSensor = (Sensor) sensors[ RNG.nextInt(sensors.length) ];
-            	cameraHeader.setText( "DANGER - CAT DETECTED - " + randSensor.getSensorType().toString() );
+            	cameraHeader.setText( "DANGER - CAT DETECTED" + Character.toString(0x1F63C) + randSensor.getSensorType().toString() );
         	}
         	else
-            	cameraHeader.setText("DANGER - CAT DETECTED");
+            	cameraHeader.setText("DANGER - CAT DETECTED" + Character.toString(0x1F63C) );
         }
         else
             cameraHeader.setText("Camera Feed - No Cats Detected");

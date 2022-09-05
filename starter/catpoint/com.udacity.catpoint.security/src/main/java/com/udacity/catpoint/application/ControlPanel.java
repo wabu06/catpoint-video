@@ -6,6 +6,8 @@ import com.udacity.catpoint.service.StyleService;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import java.awt.*;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,13 +22,11 @@ public class ControlPanel extends JPanel {
 	
 	SensorPanel sensors;
 
-    public ControlPanel(SecurityService securityService, SensorPanel sensors, ImagePanel image)
+    public ControlPanel(SecurityService securityService)
 	{
         super();
 		
         setLayout(new MigLayout());
-		
-		this.sensors = sensors;
 		
         this.securityService = securityService;
 
@@ -45,6 +45,7 @@ public class ControlPanel extends JPanel {
             v.addActionListener(e ->
 			{
                 buttonMap.get( securityService.getArmingStatus() ).setEnabled(true);
+                buttonMap.get( securityService.getArmingStatus() ).setForeground​(Color.black);
                 
                 securityService.setArmingStatus(k);
                 buttonMap.forEach((status, button) -> button.setBackground(status == k ? status.getColor() : null));
@@ -52,6 +53,7 @@ public class ControlPanel extends JPanel {
 				//sensors.extUpdateSensorList();
 				
 				v.setEnabled(false);
+				v.setForeground​(Color.white);
 				
 				if( k == ArmingStatus.ARMED_HOME )
 					securityService.processImage( securityService.getCurrentImage() );

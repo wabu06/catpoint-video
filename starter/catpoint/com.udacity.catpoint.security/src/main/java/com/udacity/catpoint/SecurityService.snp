@@ -1,0 +1,60 @@
+private void handleCatDetectedArmedHome(Boolean cat)
+    {
+    	Sensor randSensor;
+        String sensorTypeName = "";
+        
+    	setAlarmStatus(AlarmStatus.ALARM);
+            
+    	Object[] sensors = getSensors().stream().filter( s -> s.getActive() ).toArray();
+            
+        if( sensors.length > 0 )
+        {
+            randSensor = (Sensor) sensors[ RNG.nextInt(sensors.length) ];
+            sensorTypeName = randSensor.getSensorType().toString();
+        }
+    	
+    		// this is done to satisfy effectively final requirement for lamdas
+   		//String finalSensorTypeName = sensorTypeName;
+   		//statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
+    }
+    
+    private void handleCatDetectedArmedAway(Boolean cat)
+    {
+    	Sensor randSensor;
+        String sensorTypeName = "";
+        
+    	Object[] sensors = getSensors().stream().filter( s -> s.getActive() ).toArray();
+            
+        if( sensors.length > 0 )
+        {
+            	setAlarmStatus(AlarmStatus.ALARM);
+            	randSensor = (Sensor) sensors[ RNG.nextInt(sensors.length) ];
+            	sensorTypeName = randSensor.getSensorType().toString();
+        }
+        else
+        	setAlarmStatus(AlarmStatus.PENDING_ALARM);
+    
+    		// this is done to satisfy effectively final requirement for lamdas
+        //String finalSensorTypeName = sensorTypeName;
+        //statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
+    }
+    
+    private void handleCatDetectedDisarmed(Boolean cat)
+    {
+    	setAlarmStatus(AlarmStatus.NO_ALARM);
+    	
+    	Sensor randSensor;
+        String sensorTypeName = "";
+        
+    	Object[] sensors = getSensors().stream().filter( s -> s.getActive() ).toArray();
+	
+		if( sensors.length > 0 )
+		{
+			randSensor = (Sensor) sensors[ RNG.nextInt(sensors.length) ];
+    		sensorTypeName = randSensor.getSensorType().toString();
+    	}
+    
+    		// this is done to satisfy effectively final requirement for lamdas
+    	//String finalSensorTypeName = sensorTypeName;
+    	//statusListeners.forEach( sl -> sl.catDetected(cat, finalSensorTypeName) );
+    }
