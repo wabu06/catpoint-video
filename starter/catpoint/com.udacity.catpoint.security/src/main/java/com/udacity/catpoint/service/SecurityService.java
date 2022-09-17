@@ -9,12 +9,16 @@ import com.udacity.catpoint.data.Sensor;
 import com.udacity.image.service.*;
 
 import java.awt.image.BufferedImage;
+import java.awt.Color;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Random;
 
 import com.google.inject.Guice;
 import javax.inject.Inject;
+
+import java.lang.reflect.Proxy;
 
 
 /**
@@ -32,6 +36,8 @@ public class SecurityService
     private Set<StatusListener> statusListeners = new HashSet<>();
     
     private Random RNG = new Random();
+    
+    ImageService proxyImageService;
 
 	@Inject
 	public SecurityService(SecurityRepository securityRepository, ImageService imageService)
@@ -41,6 +47,13 @@ public class SecurityService
 		this.imageService = imageService;
 		
 		imageService.log.info("Using: " + imageService.getClass() + "\n");
+		
+		proxyImageService = (ImageService) Proxy.newProxyInstance
+															(
+																SecurityService.class.getClassLoader(),
+																new Class<?>[] { ImageService.class },
+																new ImageServiceHandler(securityRepository)
+															);
     }
 
     /**
@@ -65,6 +78,20 @@ public class SecurityService
 		//if( armingStatus == ArmingStatus.ARMED_HOME )
 			//processImage( getCurrentCameraImage() );
     }
+    
+    private void handleArmedAway(int length) 
+    {
+    	if( length > 0 )
+    		setAlarmStatus(AlarmStatus.ALARM);
+    	else
+    	{
+    		AlarmStatus.PENDING_ALARM.setDescription("I'm in Danger...");
+    		AlarmStatus.PENDING_ALARM.setColor( new Color(0xff8c00) );
+    		setAlarmStatus(AlarmStatus.PENDING_ALARM);
+    		AlarmStatus.PENDING_ALARM.setColor( new Color(200,150,20) );
+    		AlarmStatus.PENDING_ALARM.setDescription("Am I in Danger?");
+    	}
+    }
 
     /**
      * Internal method that handles alarm status changes based on whether
@@ -84,7 +111,8 @@ public class SecurityService
             	break;
             	
             	case ARMED_AWAY:
-            		if( sensors.length > 0 ) setAlarmStatus(AlarmStatus.ALARM); else setAlarmStatus(AlarmStatus.PENDING_ALARM);
+            		handleArmedAway(sensors.length); 
+            		//if( sensors.length > 0 ) setAlarmStatus(AlarmStatus.ALARM); else setAlarmStatus(AlarmStatus.PENDING_ALARM);
             	break;
             	
             	case DISARMED:
@@ -114,9 +142,20 @@ public class SecurityService
      * Change the alarm status of the system and notify all listeners.
      * @param status
      */
-    public void setAlarmStatus(AlarmStatus status) {
-        securityRepository.setAlarmStatus(status);
-        statusListeners.forEach(sl -> sl.notify(status));
+    public void setAlarmStatus(AlarmStatus status)
+    {
+    	/*if( (status == AlarmStatus.PENDING_ALARM) && (getArmingStatus() == ArmingStatus.ARMED_AWAY) )
+    	{
+    		status.setDescription("I'm in Danger...");
+    		securityRepository.setAlarmStatus(status);
+        	statusListeners.forEach(sl -> sl.notify(status));
+    		status.setDescription("Am I in Danger?");
+    	}
+    	else
+    	{*/
+        	securityRepository.setAlarmStatus(status);
+        	statusListeners.forEach(sl -> sl.notify(status));
+       // }
     }
 
     /**
@@ -176,6 +215,8 @@ public class SecurityService
     		if(!active)
     			return;
     	}
+    	
+    	imageService = proxyImageService;
         
         catDetected(imageService.imageContainsCat(currentCameraImage, 50.0f));
     }

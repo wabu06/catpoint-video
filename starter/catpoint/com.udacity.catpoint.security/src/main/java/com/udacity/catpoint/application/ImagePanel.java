@@ -26,6 +26,10 @@ import java.util.stream.*;
 public class ImagePanel extends JPanel implements StatusListener
 {
     private SecurityService securityService;
+    
+	private JPanel headerPanel;
+	private JPanel camPanel;
+	private JPanel bttnPanel;
 
     private JLabel cameraHeader;
     private JLabel cameraLabel;
@@ -48,17 +52,22 @@ public class ImagePanel extends JPanel implements StatusListener
 	{
         super();
 		
-        setLayout(new MigLayout());
+        setLayout( new MigLayout() );
+        
         this.securityService = securityService;
         securityService.addStatusListener(this);
 
         cameraHeader = new JLabel("Camera Feed");
         cameraHeader.setFont(StyleService.HEADING_FONT);
+        
+        //headerPanel = new JPanel(); headerPanel.setLayout( new MigLayout() ); headerPanel.add(cameraHeader, "span 3");
 
         cameraLabel = new JLabel();
         cameraLabel.setBackground(Color.WHITE);
         cameraLabel.setPreferredSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
         cameraLabel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+        
+        camPanel = new JPanel(); camPanel.setLayout( new MigLayout() ); camPanel.add(cameraLabel, "span 3");
 
         	//button allowing users to select a file to be the current camera image
         JButton refreshButton = new JButton("Refresh Camera");
@@ -100,13 +109,27 @@ public class ImagePanel extends JPanel implements StatusListener
         												autoScanButton.setForeground​(Color.white);
         											}
         										});
+        
+        JComboBox imgDetector = new JComboBox( new String[] {"FAKE", "AWS", "GOOGLE", "OPENCV"} );
+        
+        bttnPanel = new JPanel(); bttnPanel.setLayout( new MigLayout() );
+        
+        bttnPanel.add(refreshButton, "wrap"); bttnPanel.add(scanPictureButton, "wrap");
+        bttnPanel.add(autoScanButton, "wrap"); bttnPanel.add(imgDetector);
+        
         getImageFileNames();
 		
+		//add(headerPanel, "wrap");
 		add(cameraHeader, "span 3, wrap");
-        add(cameraLabel, "span 3, wrap");
-        add(refreshButton);
-        add(scanPictureButton);
-        add(autoScanButton);
+		
+        //add(cameraLabel, "span 3, wrap");
+        add(camPanel); //add(cameraLabel, "span 3");
+        
+        add(bttnPanel);
+
+        //add(refreshButton, "cell 4 1, gaptop 1");
+        //add(scanPictureButton, "cell 4 2");
+        //add(autoScanButton, "cell 4 3");
 		
 		idx = RNG.nextInt( fileNames.size() );
 		

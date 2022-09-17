@@ -20,4 +20,5 @@ public interface SecurityRepository
     ArmingStatus getArmingStatus();
 	void setCurrentImage(BufferedImage currentCameraImage);
 	BufferedImage getCurrentImage();
+	String getImageService();
 }

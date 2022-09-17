@@ -22,6 +22,8 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     private AlarmStatus alarmStatus;
     private ArmingStatus armingStatus;
     
+    private String imageService = "AWS";
+    
     private BufferedImage currentCameraImage;
 
     //preference keys
@@ -107,4 +109,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     
     @Override
     public BufferedImage getCurrentImage() { return currentCameraImage; }
+    
+    @Override
+    public String getImageService() { return imageService; }
 }

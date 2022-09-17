@@ -33,7 +33,7 @@ public class ImageServiceModule extends AbstractModule
 				if( awsId.isBlank() || awsSecret.isBlank() || awsRegion.isBlank() )
 					bind(ImageService.class).toInstance( new FakeImageService() );
 				else
-					bind(ImageService.class).toInstance( new AwsImageService() );
+					bind(ImageService.class).toInstance( new AwsImageService(awsId, awsSecret, awsRegion) );
 			}
 			catch(Throwable exp)
 			{
