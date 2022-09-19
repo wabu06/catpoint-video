@@ -21,13 +21,14 @@ public class ImageServiceHandler implements InvocationHandler
 	private ImageService fakeImageService = new FakeImageService();
 	private ImageService awsImageService;
 	private ImageService googleImageService;
+	private ImageService opencvImageService;
 	
 	ImageServiceHandler(SecurityRepository securityRepository)
 	{
 		this.securityRepository = securityRepository;
 		setupAwsImageService();
 		
-		googleImageService = fakeImageService;
+		opencvImageService = googleImageService = fakeImageService;
 	}
 	
 	private void setupAwsImageService()
@@ -59,19 +60,19 @@ public class ImageServiceHandler implements InvocationHandler
 			awsImageService = fakeImageService;
 		}
 		
-		ImageService.log.info("AWS is - " + awsImageService.getClass() + "\n");
+		ImageService.log.info("AWS is -- " + awsImageService.getClass() + "\n");
 	}
 	
 	private Object handleAwsImageService(Method method, Object[] args) throws Throwable
 	{
-		ImageService.log.info("Using Proxy\n");
-		
 		return method.invoke(awsImageService, args);
 	}
 	
 	@Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
 	{
+		ImageService.log.info("Using Proxy\n");
+		
 		Object obj = null;
 		
 		switch( securityRepository.getImageService() )
@@ -83,6 +84,13 @@ public class ImageServiceHandler implements InvocationHandler
         	case "GOOGLE":
         		obj = method.invoke(googleImageService, args);
         	break;
+        	
+        	case "OPENCV":
+        		obj = method.invoke(opencvImageService, args);
+        	break;
+        	
+        	default:
+        		obj = method.invoke(fakeImageService, args);
         }
         
         return obj;

@@ -21,4 +21,7 @@ public interface SecurityRepository
 	void setCurrentImage(BufferedImage currentCameraImage);
 	BufferedImage getCurrentImage();
 	String getImageService();
+	void setImageService(String imageService);
+	void setState(String restore);
+	String getState();
 }

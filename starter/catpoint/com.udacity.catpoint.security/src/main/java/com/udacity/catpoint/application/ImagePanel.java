@@ -9,6 +9,7 @@ import net.miginfocom.swing.MigLayout;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.io.IOException;
@@ -69,7 +70,6 @@ public class ImagePanel extends JPanel implements StatusListener
         
         camPanel = new JPanel(); camPanel.setLayout( new MigLayout() ); camPanel.add(cameraLabel, "span 3");
 
-        	//button allowing users to select a file to be the current camera image
         JButton refreshButton = new JButton("Refresh Camera");
 		
         refreshButton.addActionListener(e -> {
@@ -109,28 +109,40 @@ public class ImagePanel extends JPanel implements StatusListener
         												autoScanButton.setForeground​(Color.white);
         											}
         										});
+        bttnPanel = new JPanel(); bttnPanel.setLayout( new MigLayout() );
+        bttnPanel.add(refreshButton, "wrap"); bttnPanel.add(scanPictureButton, "wrap"); bttnPanel.add(autoScanButton, "wrap");
         
         JComboBox imgDetector = new JComboBox( new String[] {"FAKE", "AWS", "GOOGLE", "OPENCV"} );
+        imgDetector.setSelectedItem( securityService.getImageService() );
         
-        bttnPanel = new JPanel(); bttnPanel.setLayout( new MigLayout() );
+        imgDetector.addItemListener( e -> {
+        										if( e.getStateChange() == ItemEvent.SELECTED )
+        										{
+        											securityService.setImageService( (String) e.getItem() );
+        											System.out.println( securityService.getImageService() );
+        										}
+        										if( e.getStateChange() == ItemEvent.DESELECTED )
+        											System.out.println( e.getItem() );
+        									});
+        JPanel dPanel = new JPanel(); dPanel.setLayout( new MigLayout() ); dPanel.add( new JLabel("Detector:") ); dPanel.add(imgDetector);
+        bttnPanel.add(dPanel, "wrap");
+        								
+        JCheckBox stateBttn = new JCheckBox("Startup In Default State?!"); bttnPanel.add(stateBttn);
         
-        bttnPanel.add(refreshButton, "wrap"); bttnPanel.add(scanPictureButton, "wrap");
-        bttnPanel.add(autoScanButton, "wrap"); bttnPanel.add(imgDetector);
+        if( securityService.getState().equals("YES") )
+        	stateBttn.setSelected(true);
+        
+        stateBttn.addItemListener( e -> {
+        									if( e.getStateChange() == ItemEvent.SELECTED )
+        										securityService.setState("YES");
+        									else
+        										securityService.setState("NO");
+        								});
         
         getImageFileNames();
 		
-		//add(headerPanel, "wrap");
-		add(cameraHeader, "span 3, wrap");
-		
-        //add(cameraLabel, "span 3, wrap");
-        add(camPanel); //add(cameraLabel, "span 3");
-        
-        add(bttnPanel);
+		add(cameraHeader, "span 3, wrap"); add(camPanel); add(bttnPanel);
 
-        //add(refreshButton, "cell 4 1, gaptop 1");
-        //add(scanPictureButton, "cell 4 2");
-        //add(autoScanButton, "cell 4 3");
-		
 		idx = RNG.nextInt( fileNames.size() );
 		
 		showRandImage();

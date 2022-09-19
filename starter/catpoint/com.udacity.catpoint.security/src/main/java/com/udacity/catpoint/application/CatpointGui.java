@@ -32,15 +32,11 @@ public class CatpointGui extends JFrame
 {
     private SecurityRepository securityRepository = new PretendDatabaseSecurityRepositoryImpl();
 	
-    //private FakeImageService imageService = new FakeImageService();
-    
-	//private SecurityService securityService = new SecurityService(securityRepository, imageService);
+	//Injector ssInj = Guice.createInjector( new ImageServiceModule(), b->b.bind(SecurityRepository.class).toInstance(securityRepository) );
 	
-	Injector ssInj = Guice.createInjector( new ImageServiceModule(), b->b.bind(SecurityRepository.class).toInstance(securityRepository) );
+	//SecurityService securityService = ssInj.getInstance(SecurityService.class);
 	
-	SecurityService securityService = ssInj.getInstance(SecurityService.class);
-	
-	//private SecurityService securityService = new SecurityService(securityRepository);
+	private SecurityService securityService = new SecurityService(securityRepository);
 	
     private DisplayPanel displayPanel = new DisplayPanel(securityService);
     private SensorPanel sensorPanel = new SensorPanel(securityService);

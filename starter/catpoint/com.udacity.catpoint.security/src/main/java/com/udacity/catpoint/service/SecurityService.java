@@ -39,16 +39,16 @@ public class SecurityService
     
     ImageService proxyImageService;
 
-	@Inject
-	public SecurityService(SecurityRepository securityRepository, ImageService imageService)
+	//@Inject
+	public SecurityService(SecurityRepository securityRepository)
 	{
         this.securityRepository = securityRepository;
 
-		this.imageService = imageService;
+		//this.imageService = imageService;
 		
-		imageService.log.info("Using: " + imageService.getClass() + "\n");
+		//imageService.log.info("Using: " + imageService.getClass() + "\n");
 		
-		proxyImageService = (ImageService) Proxy.newProxyInstance
+		this.imageService = (ImageService) Proxy.newProxyInstance
 															(
 																SecurityService.class.getClassLoader(),
 																new Class<?>[] { ImageService.class },
@@ -112,7 +112,6 @@ public class SecurityService
             	
             	case ARMED_AWAY:
             		handleArmedAway(sensors.length); 
-            		//if( sensors.length > 0 ) setAlarmStatus(AlarmStatus.ALARM); else setAlarmStatus(AlarmStatus.PENDING_ALARM);
             	break;
             	
             	case DISARMED:
@@ -216,7 +215,7 @@ public class SecurityService
     			return;
     	}
     	
-    	imageService = proxyImageService;
+    	//imageService = proxyImageService;
         
         catDetected(imageService.imageContainsCat(currentCameraImage, 50.0f));
     }
@@ -243,4 +242,11 @@ public class SecurityService
     
     public void setCurrentImage(BufferedImage currentCameraImage) { securityRepository.setCurrentImage(currentCameraImage); }
 	public BufferedImage getCurrentImage() { return securityRepository.getCurrentImage(); }
+	
+	public void setImageService(String imageService) { securityRepository.setImageService(imageService); }
+	public String getImageService() { return securityRepository.getImageService(); }
+	
+	public void setState(String restore) { securityRepository.setState(restore); }
+	public String getState() { return securityRepository.getState(); }
 }
+

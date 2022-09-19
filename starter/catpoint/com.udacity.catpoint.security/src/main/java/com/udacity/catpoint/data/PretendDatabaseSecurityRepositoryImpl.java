@@ -22,7 +22,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     private AlarmStatus alarmStatus;
     private ArmingStatus armingStatus;
     
-    private String imageService = "AWS";
+    private String imageService, restore;
     
     private BufferedImage currentCameraImage;
 
@@ -30,30 +30,42 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     private static final String SENSORS = "SENSORS";
     private static final String ALARM_STATUS = "ALARM_STATUS";
     private static final String ARMING_STATUS = "ARMING_STATUS";
+    
+    private static final String IMG_SERVICE = "IMAGE_SERVICE";
+    private static final String STATE = "DEFAULT";
 
     private static final Preferences prefs = Preferences.userNodeForPackage(PretendDatabaseSecurityRepositoryImpl.class);
     private static final Gson gson = new Gson(); //used to serialize objects into JSON
 
     public PretendDatabaseSecurityRepositoryImpl()
 	{
-		try
+		imageService = prefs.get(IMG_SERVICE, "AWS"); // gets stored image service, if none stored set default
+		restore = prefs.get(STATE, "YES");
+		
+		if( restore.equals("YES") )
 		{
-        	prefs.clear();
+			try { prefs.clear(); } catch(Exception exp) {}
+			prefs.put(IMG_SERVICE, imageService);
+			prefs.put(STATE, restore);
 		}
-		catch(Exception exp) {}
 		
 		//load system state from prefs, or else default
-        alarmStatus = AlarmStatus.valueOf(prefs.get(ALARM_STATUS, AlarmStatus.NO_ALARM.toString()));
+        //alarmStatus = AlarmStatus.valueOf(prefs.get(ALARM_STATUS, AlarmStatus.NO_ALARM.toString()));
         armingStatus = ArmingStatus.valueOf(prefs.get(ARMING_STATUS, ArmingStatus.DISARMED.toString()));
+        
+        if( armingStatus == ArmingStatus.DISARMED )
+        	alarmStatus = AlarmStatus.NO_ALARM;
+        else
+        	alarmStatus = AlarmStatus.PENDING_ALARM;
 
         //we've serialized our sensor objects for storage, which should be a good warning sign that
         // this is likely an impractical solution for a real system
         String sensorString = prefs.get(SENSORS, null);
-        if(sensorString == null) {
+        if(sensorString == null)
             sensors = new TreeSet<>();
-        } else {
-            Type type = new TypeToken<Set<Sensor>>() {
-            }.getType();
+        else
+        {		// create empty anonymous class, because TypeToken has a protected constructor
+            Type type = new TypeToken<Set<Sensor>>() {}.getType(); 
             sensors = gson.fromJson(sensorString, type);
         }
     }
@@ -80,7 +92,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     @Override
     public void setAlarmStatus(AlarmStatus alarmStatus) {
         this.alarmStatus = alarmStatus;
-        prefs.put(ALARM_STATUS, this.alarmStatus.toString());
+        //prefs.put(ALARM_STATUS, this.alarmStatus.toString());
     }
 
     @Override
@@ -112,4 +124,21 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     
     @Override
     public String getImageService() { return imageService; }
+    
+    @Override
+    public void setImageService(String imageService)
+    { 
+    	this.imageService = imageService;
+    	prefs.put(IMG_SERVICE, imageService);
+    }
+    
+    @Override
+    public void setState(String restore)
+    {
+    	this.restore = restore;
+    	prefs.put(STATE, restore);
+    }
+    
+    @Override
+    public String getState() { return this.restore; }
 }
