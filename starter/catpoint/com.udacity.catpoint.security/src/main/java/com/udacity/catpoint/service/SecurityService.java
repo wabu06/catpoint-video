@@ -13,7 +13,7 @@ import java.awt.Color;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Random;
+//import java.util.Random;
 
 import com.google.inject.Guice;
 import javax.inject.Inject;
@@ -35,7 +35,7 @@ public class SecurityService
     private SecurityRepository securityRepository;
     private Set<StatusListener> statusListeners = new HashSet<>();
     
-    private Random RNG = new Random();
+    //private Random RNG = new Random();
     
     ImageService proxyImageService;
 
