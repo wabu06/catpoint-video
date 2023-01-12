@@ -28,7 +28,7 @@ public class ImageServiceHandler implements InvocationHandler
 		this.securityRepository = securityRepository;
 		setupAwsImageService();
 		
-		opencvImageService = googleImageService = fakeImageService;
+		opencvImageService = fakeImageService; googleImageService = new GoogleImageService();
 	}
 	
 	private void setupAwsImageService()

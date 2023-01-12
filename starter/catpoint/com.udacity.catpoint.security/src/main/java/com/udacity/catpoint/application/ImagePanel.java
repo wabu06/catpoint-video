@@ -124,7 +124,7 @@ public class ImagePanel extends JPanel implements StatusListener
         										if( e.getStateChange() == ItemEvent.DESELECTED )
         											System.out.println( e.getItem() );
         									});
-        JPanel dPanel = new JPanel(); dPanel.setLayout( new MigLayout() ); dPanel.add( new JLabel("Detector:") ); dPanel.add(imgDetector);
+        JPanel dPanel = new JPanel(); dPanel.setLayout( new MigLayout() ); dPanel.add( new JLabel("Scanner:") ); dPanel.add(imgDetector);
         bttnPanel.add(dPanel, "wrap");
         								
         JCheckBox stateBttn = new JCheckBox("Startup In Default State?!"); bttnPanel.add(stateBttn);
@@ -223,10 +223,13 @@ public class ImagePanel extends JPanel implements StatusListener
 		
 		int j;
 		
-		for(int i = 0; i < fileNames.size(); i++)
+		for(int p = 0; p < fileNames.size(); p++)
 		{
-			j = RNG.nextInt( fileNames.size() );
-			Collections.swap(fileNames, i, j);
+			for(int i = 0; i < fileNames.size(); i++)
+			{
+				j = RNG.nextInt( fileNames.size() );
+				Collections.swap(fileNames, i, j);
+			}
 		}
 		//JOptionPane.showMessageDialog(null, "image count: " + bImages.size());
 	}
