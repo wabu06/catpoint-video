@@ -40,7 +40,7 @@ public class SecurityService
     ImageService proxyImageService;
 
 	//@Inject
-	public SecurityService(SecurityRepository securityRepository) //throws Exception
+	public SecurityService(SecurityRepository securityRepository)
 	{
         this.securityRepository = securityRepository;
 
@@ -49,11 +49,11 @@ public class SecurityService
 		//imageService.log.info("Using: " + imageService.getClass() + "\n");
 		
 		this.imageService = (ImageService) Proxy.newProxyInstance
-		(
-			SecurityService.class.getClassLoader(),
-			new Class<?>[] { ImageService.class },
-			new ImageServiceHandler(securityRepository)
-		);
+															(
+																SecurityService.class.getClassLoader(),
+																new Class<?>[] { ImageService.class },
+																new ImageServiceHandler(securityRepository)
+															);
     }
 
     /**

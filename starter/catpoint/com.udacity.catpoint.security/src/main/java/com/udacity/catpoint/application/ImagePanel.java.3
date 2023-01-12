@@ -1,0 +1,264 @@
+package com.udacity.catpoint.application;
+
+import com.udacity.catpoint.data.*;
+import com.udacity.catpoint.service.SecurityService;
+import com.udacity.catpoint.service.StyleService;
+
+import net.miginfocom.swing.MigLayout;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.io.IOException;
+
+import java.nio.charset.Charset;
+import java.time.Instant;
+
+import java.util.*;
+//import java.nio.file.*;
+import java.util.stream.*;
+
+/** Panel containing the 'camera' output. Allows users to 'refresh' the camera
+ * by uploading their own picture, and 'scan' the picture, sending it for image analysis
+ */
+public class ImagePanel extends JPanel implements StatusListener
+{
+    private SecurityService securityService;
+    
+	private JPanel headerPanel;
+	private JPanel camPanel;
+	private JPanel bttnPanel;
+
+    private JLabel cameraHeader;
+    private JLabel cameraLabel;
+	
+	//private java.util.List<BufferedImage> bImages;
+    private BufferedImage currentCameraImage;
+    
+    private java.util.List<String> fileNames;
+	
+	private Random RNG = new Random( Instant.now().toEpochMilli() );
+	
+	private int idx; // filenames list index
+
+    private int IMAGE_WIDTH = 300;
+    private int IMAGE_HEIGHT = 225;
+    
+    boolean autoScan = false;
+
+    public ImagePanel(SecurityService securityService) //throws Exception
+	{
+        super();
+		
+        setLayout( new MigLayout() );
+        
+        this.securityService = securityService;
+        securityService.addStatusListener(this);
+
+        cameraHeader = new JLabel("Camera Feed");
+        cameraHeader.setFont(StyleService.HEADING_FONT);
+        
+        //headerPanel = new JPanel(); headerPanel.setLayout( new MigLayout() ); headerPanel.add(cameraHeader, "span 3");
+
+        cameraLabel = new JLabel();
+        cameraLabel.setBackground(Color.WHITE);
+        cameraLabel.setPreferredSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
+        cameraLabel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+        
+        camPanel = new JPanel(); camPanel.setLayout( new MigLayout() ); camPanel.add(cameraLabel, "span 3");
+
+        JButton refreshButton = new JButton("Refresh Camera");
+		
+        refreshButton.addActionListener(e -> {
+        										showRandImage();
+        										cameraHeader.setText("Camera Feed");
+        										
+        										if( securityService.getArmingStatus() != ArmingStatus.DISARMED )
+        										{
+        											securityService.setAlarmStatus(AlarmStatus.PENDING_ALARM);
+        											
+        											if(autoScan)
+        												securityService.processImage(currentCameraImage);
+        										}
+        									});
+        
+        	//button that sends the image to the image service
+        JButton scanPictureButton = new JButton("Scan Picture");
+        scanPictureButton.addActionListener( e -> securityService.processImage(currentCameraImage) );
+        
+        JButton autoScanButton = new JButton("Auto Scan Off");
+        autoScanButton.addActionListener( e -> { //autoScan = autoScan ? false: true;
+        											if(autoScan)
+        											{	
+        												autoScan = false;
+        												scanPictureButton.setEnabled(true);
+        												autoScanButton.setBackground(null);
+        												autoScanButton.setText("Auto Scan Off");
+        												autoScanButton.setForeground​(Color.black);
+        											}
+        											else
+        											{
+        												autoScan = true;
+        												scanPictureButton.setEnabled(false);
+        												//autoScanButton.setBackground(Color.orange);
+        												autoScanButton.setBackground( new Color(0x191970) ); // midnight blue
+        												autoScanButton.setText("Auto Scan On");
+        												autoScanButton.setForeground​(Color.white);
+        											}
+        										});
+        bttnPanel = new JPanel(); bttnPanel.setLayout( new MigLayout() );
+        bttnPanel.add(refreshButton, "wrap"); bttnPanel.add(scanPictureButton, "wrap"); bttnPanel.add(autoScanButton, "wrap");
+        
+        JComboBox imgDetector = new JComboBox( new String[] {"FAKE", "AWS", "GOOGLE", "OPENCV"} );
+        imgDetector.setSelectedItem( securityService.getImageService() );
+        
+        imgDetector.addItemListener( e -> {
+        										if( e.getStateChange() == ItemEvent.SELECTED )
+        										{
+        											securityService.setImageService( (String) e.getItem() );
+        											System.out.println( securityService.getImageService() );
+        										}
+        										if( e.getStateChange() == ItemEvent.DESELECTED )
+        											System.out.println( e.getItem() );
+        									});
+        JPanel dPanel = new JPanel(); dPanel.setLayout( new MigLayout() ); dPanel.add( new JLabel("Scanner:") ); dPanel.add(imgDetector);
+        bttnPanel.add(dPanel, "wrap");
+        								
+        JCheckBox stateBttn = new JCheckBox("Startup In Default State?!"); bttnPanel.add(stateBttn);
+        
+        if( securityService.getState().equals("YES") )
+        	stateBttn.setSelected(true);
+        
+        stateBttn.addItemListener( e -> {
+        									if( e.getStateChange() == ItemEvent.SELECTED )
+        										securityService.setState("YES");
+        									else
+        										securityService.setState("NO");
+        								});
+        
+        getImageFileNames();
+		
+		add(cameraHeader, "span 3, wrap"); add(camPanel); add(bttnPanel);
+
+		idx = RNG.nextInt( fileNames.size() );
+		
+		showRandImage();
+    }
+	
+	private void showRandImage()
+	{
+		//int size = fileNames.size();
+		
+		if( idx <  fileNames.size() - 1 )
+			idx++;
+		else
+			idx = 0;
+			
+		//System.out.println( idx + "\t" + fileNames.size() );
+		
+		try( InputStream is = getClass().getClassLoader().getResourceAsStream( "camera/" + fileNames.get(idx) ) )
+		{
+			currentCameraImage = ImageIO.read(is);
+		}
+		catch(Exception exp)
+		{
+			JOptionPane.showMessageDialog
+				(
+					null,
+					"Unable To Find A Critical Resource, Application Will Now Terminate",
+					"ERROR",
+					JOptionPane.ERROR_MESSAGE
+				);
+
+			System.exit(1);
+		}
+		
+		securityService.setCurrentImage(currentCameraImage);
+		
+		Image tmp = new ImageIcon(currentCameraImage).getImage();
+		
+		cameraLabel.setIcon( new ImageIcon( tmp.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH) ) );
+		
+		repaint();
+	}
+	
+	private int showDialog(String msg)
+	{
+		Object[] options = {"TRY AGAIN", "QUIT"};
+		
+		return JOptionPane.showOptionDialog
+					(
+						null,
+						msg,
+						"ERROR",
+						JOptionPane.YES_NO_OPTION,
+						JOptionPane.ERROR_MESSAGE,
+						null,
+						options,
+						options[1]
+					);
+	}
+	
+	private void getImageFileNames()
+	{	
+		try( InputStream is = getClass().getClassLoader().getResourceAsStream("camera/manifest.img") )
+		{
+			fileNames = new BufferedReader( new InputStreamReader(is, Charset.defaultCharset()) ).lines().collect( Collectors.toList() );
+		}
+		catch(Exception exp)
+		{
+			JOptionPane.showMessageDialog
+				(
+					null,
+					"Unable To Find A Critical Resource, Application Will Now Terminate",
+					"ERROR",
+					JOptionPane.ERROR_MESSAGE
+				);
+				
+			System.exit(1);
+		}
+		
+		int j;
+		
+		for(int p = 0; p < fileNames.size(); p++)
+		{
+			for(int i = 0; i < fileNames.size(); i++)
+			{
+				j = RNG.nextInt( fileNames.size() );
+				Collections.swap(fileNames, i, j);
+			}
+		}
+		//JOptionPane.showMessageDialog(null, "image count: " + bImages.size());
+	}
+
+    @Override
+    public void notify(AlarmStatus status) {} //no behavior necessary
+
+    @Override
+    public void catDetected(boolean catDetected, Object[] sensors)
+	{
+        if(catDetected)
+        {
+            if( sensors.length > 0 )
+        	{
+            	Sensor randSensor = (Sensor) sensors[ RNG.nextInt(sensors.length) ];
+            	cameraHeader.setText( "DANGER - CAT DETECTED" + Character.toString(0x1F63C) + randSensor.getSensorType().toString() );
+        	}
+        	else
+            	cameraHeader.setText("DANGER - CAT DETECTED" + Character.toString(0x1F63C) );
+        }
+        else
+            cameraHeader.setText("Camera Feed - No Cats Detected");
+    }
+
+    @Override
+    public void sensorStatusChanged() {} //no behavior necessary
+    
+    @Override
+    public void resetCameraHeaderMsg() { cameraHeader.setText("Camera Feed"); }
+	
+	public BufferedImage getCurrentCameraImage() { return currentCameraImage; }
+}
