@@ -13,6 +13,7 @@ import java.awt.Color;
 
 import java.util.HashSet;
 import java.util.Set;
+//import java.util.Random;
 
 import com.google.inject.Guice;
 import javax.inject.Inject;
@@ -33,13 +34,20 @@ public class SecurityService
 	
     private SecurityRepository securityRepository;
     private Set<StatusListener> statusListeners = new HashSet<>();
-
+    
+    //private Random RNG = new Random();
+    
     ImageService proxyImageService;
 
+	//@Inject
 	public SecurityService(SecurityRepository securityRepository) //throws Exception
 	{
         this.securityRepository = securityRepository;
 
+		//this.imageService = imageService;
+		
+		//imageService.log.info("Using: " + imageService.getClass() + "\n");
+		
 		this.imageService = (ImageService) Proxy.newProxyInstance
 		(
 			SecurityService.class.getClassLoader(),
@@ -55,6 +63,9 @@ public class SecurityService
      */
     public void setArmingStatus(ArmingStatus armingStatus)
 	{
+        //if(armingStatus == ArmingStatus.DISARMED)
+        	//setAlarmStatus(AlarmStatus.NO_ALARM);
+		
 		if(armingStatus == ArmingStatus.DISARMED)
 		{
 			setAlarmStatus(AlarmStatus.NO_ALARM);
@@ -63,6 +74,9 @@ public class SecurityService
 		}
 
         securityRepository.setArmingStatus(armingStatus);
+		
+		//if( armingStatus == ArmingStatus.ARMED_HOME )
+			//processImage( getCurrentCameraImage() );
     }
     
     private void handleArmedAway(int length) 
@@ -92,12 +106,18 @@ public class SecurityService
         {
         	switch( getArmingStatus() )
         	{
-            	case ARMED_HOME -> setAlarmStatus(AlarmStatus.ALARM);
+            	case ARMED_HOME:
+            		setAlarmStatus(AlarmStatus.ALARM);
+            	break;
             	
-            	case ARMED_AWAY -> handleArmedAway(sensors.length); 
+            	case ARMED_AWAY:
+            		handleArmedAway(sensors.length); 
+            	break;
             	
-            	case DISARMED -> setAlarmStatus(AlarmStatus.NO_ALARM);
-            };
+            	case DISARMED:
+            		setAlarmStatus(AlarmStatus.NO_ALARM);
+            	break;
+            }
         }
         else
         	setAlarmStatus(AlarmStatus.NO_ALARM);
@@ -123,23 +143,31 @@ public class SecurityService
      */
     public void setAlarmStatus(AlarmStatus status)
     {
-        securityRepository.setAlarmStatus(status);
-        statusListeners.forEach(sl -> sl.notify(status));
+    	/*if( (status == AlarmStatus.PENDING_ALARM) && (getArmingStatus() == ArmingStatus.ARMED_AWAY) )
+    	{
+    		status.setDescription("I'm in Danger...");
+    		securityRepository.setAlarmStatus(status);
+        	statusListeners.forEach(sl -> sl.notify(status));
+    		status.setDescription("Am I in Danger?");
+    	}
+    	else
+    	{*/
+        	securityRepository.setAlarmStatus(status);
+        	statusListeners.forEach(sl -> sl.notify(status));
+       // }
     }
 
     /**
      * Internal method for updating the alarm status when a sensor has been activated.
      */
-    private void handleSensorActivated()
-    {
-        if(securityRepository.getArmingStatus() == ArmingStatus.DISARMED)
+    private void handleSensorActivated() {
+        if(securityRepository.getArmingStatus() == ArmingStatus.DISARMED) {
             return; //no problem if the system is disarmed
-
-        switch( securityRepository.getAlarmStatus() )
-        {
-            case NO_ALARM -> setAlarmStatus(AlarmStatus.PENDING_ALARM);
-
-            case PENDING_ALARM -> setAlarmStatus(AlarmStatus.ALARM);
+        }
+        switch(securityRepository.getAlarmStatus()) {
+            case NO_ALARM: /* NO_ALARM -> */ setAlarmStatus(AlarmStatus.PENDING_ALARM);
+				break;
+            case PENDING_ALARM: /* PENDING_ALARM -> */ setAlarmStatus(AlarmStatus.ALARM);
         }
     }
 
@@ -148,8 +176,12 @@ public class SecurityService
      */
     private void handleSensorDeactivated()
     {
-        if ( securityRepository.getAlarmStatus() == AlarmStatus.PENDING_ALARM )
-        	setAlarmStatus(AlarmStatus.NO_ALARM);
+        switch(securityRepository.getAlarmStatus())
+        {
+            case PENDING_ALARM: /* PENDING_ALARM -> */ setAlarmStatus(AlarmStatus.NO_ALARM);
+            	//break;
+			//case ALARM: /* ALARM -> */ setAlarmStatus(AlarmStatus.PENDING_ALARM);
+        }
     }
 
     /**
@@ -159,6 +191,11 @@ public class SecurityService
      */
     public void changeSensorActivationStatus(Sensor sensor, Boolean active)
     {
+        /*if(!sensor.getActive() && active) {
+            handleSensorActivated();
+        } else if (sensor.getActive() && !active) {
+            handleSensorDeactivated();
+        }*/
         sensor.setActive(active);
         securityRepository.updateSensor(sensor);
     }
@@ -177,7 +214,9 @@ public class SecurityService
     		if(!active)
     			return;
     	}
-
+    	
+    	//imageService = proxyImageService;
+        
         catDetected(imageService.imageContainsCat(currentCameraImage, 50.0f));
     }
 
@@ -201,18 +240,13 @@ public class SecurityService
         return securityRepository.getArmingStatus();
     }
     
-    public void setCurrentImage(BufferedImage currentCameraImage) {
-    	securityRepository.setCurrentImage(currentCameraImage);
-    }
-	
+    public void setCurrentImage(BufferedImage currentCameraImage) { securityRepository.setCurrentImage(currentCameraImage); }
 	public BufferedImage getCurrentImage() { return securityRepository.getCurrentImage(); }
 	
 	public void setImageService(String imageService) { securityRepository.setImageService(imageService); }
-	
 	public String getImageService() { return securityRepository.getImageService(); }
 	
 	public void setState(String restore) { securityRepository.setState(restore); }
-	
 	public String getState() { return securityRepository.getState(); }
 }
 

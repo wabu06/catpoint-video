@@ -39,15 +39,26 @@ public class ImageServiceHandler implements InvocationHandler
 	{
 		ImageService.log.info("Using Proxy\n");
 		
-		return switch( securityRepository.getImageService() )
-        		{
-        			case "AWS" -> method.invoke(awsImageService, args);
+		Object obj = null;
+		
+		switch( securityRepository.getImageService() )
+        {
+        	case "AWS":
+        		 obj = method.invoke(awsImageService, args);
+        	break;
         	
-        			case "GOOGLE" -> method.invoke(googleImageService, args);
-
-        			case "OPENCV" -> method.invoke(opencvImageService, args);
-        		
-        			default -> method.invoke(fakeImageService, args);
-        		};
+        	case "GOOGLE":
+        		obj = method.invoke(googleImageService, args);
+        	break;
+        	
+        	case "OPENCV":
+        		obj = method.invoke(opencvImageService, args);
+        	break;
+        	
+        	default:
+        		obj = method.invoke(fakeImageService, args);
+        }
+        
+        return obj;
 	}
 }
