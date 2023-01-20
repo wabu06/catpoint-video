@@ -52,8 +52,11 @@ public class CatpointGui extends JFrame
 		this.controlPanel = new ControlPanel(securityService);
 	
         //setLocation(100, 100);
-		setLocation(50, 50);
+		//setLocation(50, 50);
         //setSize(600, 850);
+        
+        setLocation(-600, -720);
+        
 		setSize(600, 720);
         setTitle("NoCats");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

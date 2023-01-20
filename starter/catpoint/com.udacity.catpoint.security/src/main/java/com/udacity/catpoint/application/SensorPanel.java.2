@@ -116,39 +116,22 @@ public class SensorPanel extends JPanel implements StatusListener
      * Adds a sensor to the securityService and then rebuilds the sensor list
      * @param sensor The sensor to add
      */
-    /*private void addSensor(Sensor sensor)
-    {
+    private void addSensor(Sensor sensor) {
         if(securityService.getSensors().size() < 4) {
             securityService.addSensor(sensor);
             updateSensorList(sensorListPanel);
         } else {
             JOptionPane.showMessageDialog(null, "To add more than 4 sensors, please subscribe to our Premium Membership!");
         }
-    }*/
-    
-    private void addSensor(Sensor sensor)
-    {
-        securityService.addSensor(sensor);
-        updateSensorList(sensorListPanel);
-        
-        if( securityService.getSensors().size() + 1 > 4)
-        	addNewSensorButton.setEnabled(false);
     }
 
     /**
      * Remove a sensor from the securityService and then rebuild the sensor list
      * @param sensor The sensor to remove
      */
-    private void removeSensor(Sensor sensor)
-    {
+    private void removeSensor(Sensor sensor) {
         securityService.removeSensor(sensor);
         updateSensorList(sensorListPanel);
-        
-        if( !addNewSensorButton.isEnabled() )
-        {
-        	if( securityService.getSensors().size() < 4 )
-       			addNewSensorButton.setEnabled(true);
-        }
     }
 	
 	public void extUpdateSensorList() { updateSensorList(sensorListPanel); }
