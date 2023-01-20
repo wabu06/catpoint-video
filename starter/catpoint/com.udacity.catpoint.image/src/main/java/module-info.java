@@ -1,6 +1,6 @@
 module com.udacity.catpoint.image
 {
-	exports com.udacity.image.service;
+	exports com.udacity.detection.service;
 	
 	requires java.desktop;
 	requires org.slf4j;
@@ -9,12 +9,5 @@ module com.udacity.catpoint.image
 	requires software.amazon.awssdk.regions;
 	requires software.amazon.awssdk.services.rekognition;
 	
-	//requires proto.google.cloud.vision.v1;
-	//requires google.cloud.vision;
-	requires com.udacity.catpoint.google;
-	
-	
-	//requires com.google.protobuf; //try adding as dependency for image service
-	
-	opens com.udacity.image.service;
+	opens com.udacity.detection.service;
 }

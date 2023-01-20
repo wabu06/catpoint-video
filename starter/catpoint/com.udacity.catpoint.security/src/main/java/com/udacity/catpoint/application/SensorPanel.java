@@ -2,13 +2,16 @@ package com.udacity.catpoint.application;
 
 import com.udacity.catpoint.data.Sensor;
 import com.udacity.catpoint.data.SensorType;
-import com.udacity.catpoint.service.SecurityService;
-import com.udacity.catpoint.service.StyleService;
+//import com.udacity.catpoint.service.SecurityService;
+import com.udacity.catpoint.service.*;
+
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 
-import java.util.List;
+import java.util.*;
+
+//import java.util.UUID;
 
 import com.udacity.catpoint.data.AlarmStatus;
 

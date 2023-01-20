@@ -4,6 +4,8 @@ import java.util.Set;
 
 import java.awt.image.BufferedImage;
 
+import com.udacity.catpoint.service.*;
+
 
 /**
  * Interface showing the methods our security repository will need to support
@@ -24,4 +26,5 @@ public interface SecurityRepository
 	void setImageService(String imageService);
 	void setState(String restore);
 	String getState();
+	SensorService getSensorService(Sensor sensor);
 }

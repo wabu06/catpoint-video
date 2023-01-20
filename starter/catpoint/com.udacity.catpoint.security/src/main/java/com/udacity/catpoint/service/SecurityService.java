@@ -11,13 +11,16 @@ import com.udacity.image.service.*;
 import java.awt.image.BufferedImage;
 import java.awt.Color;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+//import java.util.Set;
 
 import com.google.inject.Guice;
 import javax.inject.Inject;
 
 import java.lang.reflect.Proxy;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -34,7 +37,9 @@ public class SecurityService
     private SecurityRepository securityRepository;
     private Set<StatusListener> statusListeners = new HashSet<>();
 
-    ImageService proxyImageService;
+    private ImageService proxyImageService;
+    
+    private ExecutorService pool;
 
 	public SecurityService(SecurityRepository securityRepository) //throws Exception
 	{
@@ -46,6 +51,8 @@ public class SecurityService
 			new Class<?>[] { ImageService.class },
 			new ImageServiceHandler(securityRepository)
 		);
+		
+		pool = Executors.newFixedThreadPool​(4);
     }
 
     /**
@@ -189,12 +196,19 @@ public class SecurityService
         return securityRepository.getSensors();
     }
 
-    public void addSensor(Sensor sensor) {
-        securityRepository.addSensor(sensor);
+    public void addSensor(Sensor sensor)
+    {
+    	securityRepository.addSensor(sensor);
+    	SensorService ss = securityRepository.getSensorService(sensor);
+    	pool.submit( () -> ss.getAndAnalyzeFeed() );
+    	//pool.submit( () -> sensorServiceMap.get( sensor.getSensorId() ).getAndAnalyzeFeed() );
     }
 
-    public void removeSensor(Sensor sensor) {
+    public void removeSensor(Sensor sensor)
+    {
         securityRepository.removeSensor(sensor);
+        SensorService ss = securityRepository.getSensorService(sensor);
+        ss.stopFeed();
     }
 
     public ArmingStatus getArmingStatus() {

@@ -4,11 +4,13 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 import java.lang.reflect.Type;
-import java.util.Set;
-import java.util.TreeSet;
+//import java.util.Set;
+import java.util.*;
 import java.util.prefs.Preferences;
 
 import java.awt.image.BufferedImage;
+
+import com.udacity.catpoint.service.*;
 
 
 /**
@@ -36,6 +38,8 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
 
     private static final Preferences prefs = Preferences.userNodeForPackage(PretendDatabaseSecurityRepositoryImpl.class);
     private static final Gson gson = new Gson(); //used to serialize objects into JSON
+
+	private Map<UUID, Sensor> sensorServiceMap;
 
     public PretendDatabaseSecurityRepositoryImpl()
 	{
@@ -68,17 +72,23 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
             Type type = new TypeToken<Set<Sensor>>() {}.getType(); 
             sensors = gson.fromJson(sensorString, type);
         }
+        
+        sensorServiceMap = new HashMap<>();
     }
 
     @Override
-    public void addSensor(Sensor sensor) {
+    public void addSensor(Sensor sensor)
+    {
         sensors.add(sensor);
+        sensorServiceMap.put( sensor.getSensorId(), new SensorService(securityService, sensor, feedSource) );
         prefs.put(SENSORS, gson.toJson(sensors));
     }
 
     @Override
-    public void removeSensor(Sensor sensor) {
+    public void removeSensor(Sensor sensor)
+    {
         sensors.remove(sensor);
+        sensorServiceMap.remove( sensor.getSensorId() );
         prefs.put(SENSORS, gson.toJson(sensors));
     }
 
@@ -104,6 +114,11 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     @Override
     public Set<Sensor> getSensors() {
         return sensors;
+    }
+    
+    @Override
+    public SensorService getSensorService(Sensor sensor) {
+    	return sensorServiceMap.get( sensor.getSensorId() );
     }
 
     @Override

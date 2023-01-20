@@ -5,7 +5,7 @@ import com.udacity.catpoint.data.*;
 import com.udacity.catpoint.service.*;
 import com.udacity.catpoint.application.*;
 
-import com.udacity.image.service.*;
+import com.udacity.detection.service.*;
 
 import org.opencv.core.*;
 import org.opencv.imgcodecs.*;
@@ -20,14 +20,16 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
+import javax.swing.JOptionPane;
+
 import java.util.UUID;
 
 import java.lang.reflect.Proxy;
 
 
 
-		// SensorFeedService sfs = new SensorFeedService(new SecurityRepository(), new Sensor(name, type) )
-public class SensorFeedService
+		// SensorService sfs = new SensorService(new SecurityRepository(), new Sensor(name, type) )
+public class SensorService
 {
 	private SecurityRepository securityRepository;
 	
@@ -45,7 +47,7 @@ public class SensorFeedService
 	
 	private VideoCapture capture;
 	
-	public SensorFeedService(SecurityRepository sr, SecurityService ss, Sensor sense, String feedSource)
+	public SensorService(SecurityRepository sr, SecurityService ss, Sensor sense, String feedSource)
 	{
 		this.securityRepository = sr;
 		
@@ -109,6 +111,9 @@ public class SensorFeedService
 				exp.printStackTrace();
 			}
 	}
+	
+	public void startFeed() { feed = true; }
+	public void stopFeed() { feed = false; }
 	
 	public void setSensorAlarmStatus(AlarmStatus status)
     {
