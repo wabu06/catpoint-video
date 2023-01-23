@@ -12,11 +12,13 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.opencv.core.Mat;
+
 /**
  * JPanel containing the buttons to manipulate arming status of the system.
  */
-public class ControlPanel extends JPanel {
-
+public class ControlPanel extends JPanel implements StatusListener
+{
     private SecurityService securityService;
     private Map<ArmingStatus, JButton> buttonMap;
 	
@@ -44,19 +46,18 @@ public class ControlPanel extends JPanel {
 		{
             v.addActionListener(e ->
 			{
+                boolean active = securityService.getSensors().stream().anyMatch( s -> s.getActive().booleanValue()  );
+    		
+    			if(!active) return;
+                
                 buttonMap.get( securityService.getArmingStatus() ).setEnabled(true);
                 buttonMap.get( securityService.getArmingStatus() ).setForeground​(Color.black);
                 
                 securityService.setArmingStatus(k);
                 buttonMap.forEach((status, button) -> button.setBackground(status == k ? status.getColor() : null));
 				
-				//sensors.extUpdateSensorList();
-				
 				v.setEnabled(false);
 				v.setForeground​(Color.white);
-				
-				if( k == ArmingStatus.ARMED_HOME )
-					securityService.processImage( securityService.getCurrentImage() );
             });
         });
 
@@ -66,6 +67,35 @@ public class ControlPanel extends JPanel {
         ArmingStatus currentStatus = securityService.getArmingStatus();
         
         buttonMap.get(currentStatus).setBackground( currentStatus.getColor() );
+        buttonMap.get(currentStatus).setEnabled(false);
+    }
+    
+    @Override
+    public void notify(AlarmStatus status) {} // no behavior necessary
+
+    @Override
+    public void catDetected(boolean catDetected, Object[] sensors) {} // no behavior necessary
+
+    @Override
+    public void sensorStatusChanged() {}
+    
+    @Override
+    public void resetCameraHeaderMsg() {}
+    
+    @Override
+    public void showFeed(Mat frame) {}
+    
+    @Override
+    public void armingStatusChanged()
+    {
+    	ArmingStatus prevStatus = securityService.getPrevArmingStatus();
+    	
+    	buttonMap.get(prevStatus).setBackground( prevStatus.getColor() );
+        buttonMap.get(prevStatus).setEnabled(true);
+        
+    	ArmingStatus currentStatus = securityService.getArmingStatus();
+    	
+    	buttonMap.get(currentStatus).setBackground( currentStatus.getColor() );
         buttonMap.get(currentStatus).setEnabled(false);
     }
 }

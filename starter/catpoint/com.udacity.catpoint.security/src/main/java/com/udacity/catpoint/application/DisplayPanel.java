@@ -7,6 +7,8 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 
+import org.opencv.core.Mat;
+
 /**
  * Displays the current status of the system. Implements the StatusListener
  * interface so that it can be notified whenever the status changes.
@@ -28,7 +30,9 @@ public class DisplayPanel extends JPanel implements StatusListener {
 
         panelLabel.setFont(StyleService.HEADING_FONT);
 
-        notify(securityService.getAlarmStatus());
+        //notify(securityService.getAlarmStatus());
+        
+        updateSystemStatus();
 
         add(panelLabel, "span 2, wrap");
         add(systemStatusLabel);
@@ -39,17 +43,33 @@ public class DisplayPanel extends JPanel implements StatusListener {
     @Override
     public void notify(AlarmStatus status)
     {
-        currentStatusLabel.setText(status.getDescription());
-        currentStatusLabel.setBackground(status.getColor());
-        currentStatusLabel.setOpaque(true);
+		// currentStatusLabel.setText(status.getDescription());
+		// currentStatusLabel.setBackground(status.getColor());
+		// currentStatusLabel.setOpaque(true);
     }
 
     @Override
-    public void catDetected(boolean catDetected, Object[] sensors) {} // no behavior necessary
+    public void catDetected(boolean catDetected, Sensor sensor) {} // no behavior necessary
 
     @Override
     public void sensorStatusChanged() {} // no behavior necessary
     
     @Override
     public void resetCameraHeaderMsg() {}
+    
+    @Override
+    void showFeed(Mat frame) {}
+    
+    @Override
+    void armingStatusChanged() {}
+    
+    @Override
+    void updateSystemStatus()
+    {
+    	ArmingStatus status = securityService.getArmingStatus();
+    	
+    	currentStatusLabel.setText(status.getDescription());
+        currentStatusLabel.setBackground(status.getColor());
+        currentStatusLabel.setOpaque(true);
+    }
 }

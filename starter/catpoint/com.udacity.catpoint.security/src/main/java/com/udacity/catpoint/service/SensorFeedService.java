@@ -2,7 +2,7 @@ package com.udacity.catpoint.service;
 
 
 import com.udacity.catpoint.data.*;
-import com.udacity.catpoint.service.*;
+//import com.udacity.catpoint.service.*;
 import com.udacity.catpoint.application.*;
 
 import com.udacity.detection.service.*;
@@ -11,7 +11,7 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.*;
 import org.opencv.imgproc.Imgproc;
 
-import org.opencv.highgui.HighGui;
+//import org.opencv.highgui.HighGui;
 import org.opencv.videoio.VideoCapture;
 
 import java.time.*;
@@ -29,52 +29,59 @@ import java.lang.reflect.Proxy;
 
 
 		// SensorService sfs = new SensorService(new SecurityRepository(), new Sensor(name, type) )
-public class SensorService
+public class SensorFeedService
 {
-	private SecurityRepository securityRepository;
-	
+	//private SecurityRepository securityRepository;
 	private SecurityService securityService;
 	
-	private Sensor sense;
+	private Sensor sensor;
+	
+	private AlarmStatus sensorAlarmStatus;
+	
 	private boolean show;
 	private boolean feed;
 	
 	private DetectionService detectionService;
 	
-	private static FeedDisplayWindow fdw = FeedDisplayWindow.getInstance();
+	//private FeedDisplayWindow fdw = FeedDisplayWindow.getInstance();
 	
 	private String feedSource;
 	
 	private VideoCapture capture;
 	
-	public SensorService(SecurityRepository sr, SecurityService ss, Sensor sense, String feedSource)
+	//public SensorService(SecurityRepository sr, SecurityService ss, Sensor sensor, String feedSource)
+	public SensorFeedService(SecurityService ss, Sensor sensor)
 	{
-		this.securityRepository = sr;
-		
+		//this.securityRepository = sr;
 		this.securityService = ss;
 
-		this.sense = sense;
+		this.sensor = sensor;
+		
 		show = false;
+		feed = true;
+		
+		sensorAlarmStatus = AlarmStatus.NO_ALARM;
 		
 		this.detectionService = (DetectionService) Proxy.newProxyInstance
 		(
 			SecurityService.class.getClassLoader(),
 			new Class<?>[] { DetectionService.class },
-			new DetectionServiceHandler(securityRepository)
+			new DetectionServiceHandler( securityService.getRepository() )
 		);
 		
-		feed = true;
+		this.feedSource = null;
 		
-		this.feedSource = feedSource;
-		
-		System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
+		//System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
 		
 		capture = new VideoCapture(); 
 
 		if( !capture.open(feedSource) )
 		{
-			System.out.println("Unable to open video file!");
-			System.exit(0);
+			// System.out.println("Unable to open video file!");
+			JOptionPane.showMessageDialog(null, "Unable To Open Feed Source!", "ERROR", JOptionPane.ERROR_MESSAGE);
+			feed = false;
+			show = false;
+			//System.exit(0);
 		}
 	}
 	
@@ -82,47 +89,28 @@ public class SensorService
 	
 	public void setShow(boolean show) { this.show = show; }
 	
-	public UUID getSensorId() {
-		return sense.getSensorId();
-	}
-	
-	private void showFeed(Mat frame)
-	{
-			//Imgproc.putText(frame, elapse.toString(), new Point(10, 50), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 255, 255), 2);
-						
-			MatOfByte mob = new MatOfByte();
-			Imgcodecs.imencode(".jpg", frame, mob);
-				
-			byte[] byteArray = mob.toArray(); 
-
-			//InputStream is = new ByteArrayInputStream(byteArray); 
-			
-			try( InputStream is = new ByteArrayInputStream(byteArray) )
-			{
-				BufferedImage buffImg = ImageIO.read(is);
-
-				Image tmp = new ImageIcon(buffImg).getImage();
-				
-				fdw.getDisplay().setIcon( new ImageIcon( tmp.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH) ) );
-					
-				fdw.repaint();
-			}
-			catch(Exception exp) {
-				exp.printStackTrace();
-			}
-	}
+	public boolean getFeed() { return feed; }
+	public boolean getShow() { return show; }
 	
 	public void startFeed() { feed = true; }
 	public void stopFeed() { feed = false; }
 	
-	public void setSensorAlarmStatus(AlarmStatus status)
+	public Sensor getSensor() {
+		return sensor;
+	}
+	
+	public UUID getSensorId() {
+		return sensor.getSensorId();
+	}
+
+	private void setSensorAlarmStatus(AlarmStatus status)
     {
-        securityRepository.setAlarmStatus(sense, status);
-        //statusListeners.forEach(sl -> sl.notify(status));
+        sensorAlarmStatus = status;
+        //ss.statusListeners.forEach(sl -> sl.notify(status));
     }
     
     public AlarmStatus getSensorAlarmStatus() {
-        return securityRepository.getAlarmStatus(sense);
+        return sensorAlarmStatus;
     }
 	
 	private void catDetected(Boolean cat)
@@ -131,7 +119,7 @@ public class SensorService
 		
         if(cat)
         {
-        	switch( getArmingStatus() )
+        	switch( securityService.getArmingStatus() )
         	{
             	case ARMED_HOME -> setSensorAlarmStatus(AlarmStatus.ALARM);
             	
@@ -142,13 +130,16 @@ public class SensorService
         }
         else
         	setSensorAlarmStatus(AlarmStatus.NO_ALARM);
+        
+        //securityService.updateSensorAlarmSatus(this);
         	
-        //statusListeners.forEach( sl -> sl.catDetected(cat, sensors) );
+        securityService.getStatusListeners.forEach( sl -> sl.catDetected(cat, sensor) );
+        securityService.getStatusListeners.forEach( sl -> sl.sensorStatusChanged() );
     }
 	
 	private void processFrame(Mat frame)
     {
-    	if( securityService.getArmingStatus() == ArmingStatus.DISARMED && !sense.getActive() )
+    	if( !sensor.getActive() )
 			return;
 
         catDetected(detectionService.frameContainsCat(frame, 50.0f)); // OpencvDetectService(Mat frame, confidenceThreshhold)
@@ -168,8 +159,11 @@ public class SensorService
 					
 				if( !capture.open(feedSource) )
 				{
-					System.out.println("Unable to open video file!");
-					System.exit(0);
+					//System.out.println("Unable to open video file!");
+					JOptionPane.showMessageDialog(null, "Unable To Open Feed Source!", "ERROR", JOptionPane.ERROR_MESSAGE);
+					feed = false;
+					show = false;
+					//System.exit(0);
 				}
 					
 				continue;
@@ -179,8 +173,10 @@ public class SensorService
 			
 			processFrame(frame);
 
-			if(show)
-				showFeed(frame);
+				// show currently selected feed
+			//if( sensor.equals( ss.getSelectedFeed().getSensor() ))
+			
+			securityService.getStatusListeners.forEach( sl -> sl.showFeed(frame, sensor) );
 		}
 	}
 }

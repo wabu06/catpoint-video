@@ -9,6 +9,11 @@ public class CatpointApp
 {
     public static void main(String[] args)
     {
-		invokeLater​( () -> { CatpointGui gui = new CatpointGui(); gui.setVisible(true); } );
+		invokeLater​( () ->
+		{
+			CatpointGui gui = new CatpointGui();
+			gui.setVisible(true);
+			gui.getFeedDisplay().setVisible(true);
+		});
     }
 }

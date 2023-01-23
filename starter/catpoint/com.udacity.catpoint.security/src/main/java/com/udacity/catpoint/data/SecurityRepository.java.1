@@ -1,6 +1,11 @@
 package com.udacity.catpoint.data;
 
 import java.util.Set;
+import java.util.Map;
+
+import com.udacity.catpoint.service.SensorFeedService;
+
+//import java.awt.image.BufferedImage;
 
 
 /**
@@ -13,12 +18,20 @@ public interface SecurityRepository
     void updateSensor(Sensor sensor);
     void selectFeed(Sensor sensor);
     SensorFeed getSelectFeed();
+    void setAlarmStatus(AlarmStatus alarmStatus);
     void setArmingStatus(ArmingStatus armingStatus);
     Set<Sensor> getSensors();
+    Map<Sensor, SensorFeedService> getSensorFeeds();
+    AlarmStatus getAlarmStatus();
     ArmingStatus getArmingStatus();
     ArmingStatus getPrevArmingStatus();
+	//void setCurrentImage(BufferedImage currentCameraImage);
+	//BufferedImage getCurrentImage();
+	//String getImageService();
+	//void setImageService(String imageService);
 	void setState(String restore);
 	String getState();
-	void setDetectionService(String ds);
+	SensorFeed getSensorFeed(Sensor sensor);
+	void updateSensorAlarmSatus(SensorFeedService sfs);
 	String getDetectionService();
 }

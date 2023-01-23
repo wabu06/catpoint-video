@@ -1,0 +1,256 @@
+package com.udacity.catpoint.service;
+
+import com.udacity.catpoint.application.StatusListener;
+//import com.udacity.catpoint.data.AlarmStatus;
+//import com.udacity.catpoint.data.ArmingStatus;
+//import com.udacity.catpoint.data.SecurityRepository;
+import com.udacity.catpoint.data.*;
+
+import com.udacity.image.service.*;
+
+import java.awt.image.BufferedImage;
+import java.awt.Color;
+
+import java.util.*;
+//import java.util.Set;
+
+import com.google.inject.Guice;
+import javax.inject.Inject;
+
+import java.lang.reflect.Proxy;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+
+/**
+ * Service that receives information about changes to the security system. Responsible for
+ * forwarding updates to the repository and making any decisions about changing the system state.
+ *
+ * This is the class that should contain most of the business logic for our system, and it is the
+ * class you will be writing unit tests for.
+ */
+public class SecurityService
+{
+    private SecurityRepository securityRepository;
+    private Set<StatusListener> statusListeners = new HashSet<>(); // move to data, or make SensorFeed a status listener
+    
+    private ExecutorService pool;
+
+	public SecurityService(SecurityRepository securityRepository)
+	{
+        this.securityRepository = securityRepository;
+		
+		pool = Executors.newFixedThreadPool​(4);
+    }
+
+    /**
+     * Sets the current arming status for the system. Changing the arming status
+     * may update both the alarm status.
+     * @param armingStatus
+     */
+    public void setArmingStatus(ArmingStatus armingStatus)
+	{
+		if(armingStatus == ArmingStatus.DISARMED)
+		{
+			setAlarmStatus(AlarmStatus.NO_ALARM);
+			getSensors().forEach( s -> s.setActive(Boolean.FALSE) );
+			statusListeners.forEach( sl -> { sl.sensorStatusChanged(); sl.resetCameraHeaderMsg(); } );
+		}
+
+        securityRepository.setArmingStatus(armingStatus);
+    }
+    
+    private void handleArmedAway(int length) 
+    {
+    	if( length > 0 )
+    		setAlarmStatus(AlarmStatus.ALARM);
+    	else
+    	{
+    		AlarmStatus.PENDING_ALARM.setDescription("I'm in Danger...");
+    		AlarmStatus.PENDING_ALARM.setColor( new Color(0xff8c00) );
+    		setAlarmStatus(AlarmStatus.PENDING_ALARM);
+    		AlarmStatus.PENDING_ALARM.setColor( new Color(200,150,20) );
+    		AlarmStatus.PENDING_ALARM.setDescription("Am I in Danger?");
+    	}
+    }
+
+    /**
+     * Internal method that handles alarm status changes based on whether
+     * the camera currently shows a cat.
+     * @param cat True if a cat is detected, otherwise false.
+     */
+    private void catDetected(Boolean cat)
+	{
+		Object[] sensors = getSensors().stream().filter( s -> s.getActive() ).toArray();
+		
+        if(cat)
+        {
+        	switch( getArmingStatus() )
+        	{
+            	case ARMED_HOME -> setAlarmStatus(AlarmStatus.ALARM);
+            	
+            	case ARMED_AWAY -> handleArmedAway(sensors.length); 
+            	
+            	case DISARMED -> setAlarmStatus(AlarmStatus.NO_ALARM);
+            };
+        }
+        else
+        	setAlarmStatus(AlarmStatus.NO_ALARM);
+        	
+        statusListeners.forEach( sl -> sl.catDetected(cat, sensors) );
+    }
+
+    /**
+     * Register the StatusListener for alarm system updates from within the SecurityService.
+     * @param statusListener
+     */
+    public void addStatusListener(StatusListener statusListener) {
+        statusListeners.add(statusListener);
+    }
+
+    public void removeStatusListener(StatusListener statusListener) {
+        statusListeners.remove(statusListener);
+    }
+    
+    public Set<StatusListener> getStatusListeners() {
+    	return statusListeners;
+    }
+    
+    public Sensor getSelectedFeed() {
+    	return securityRepository.getSelectedFeed();
+    }
+
+    /**
+     * Change the alarm status of the system and notify all listeners.
+     * @param status
+     */
+    public void setAlarmStatus(AlarmStatus status)
+    {
+        securityRepository.setAlarmStatus(status);
+        statusListeners.forEach(sl -> sl.notify(status));
+    }
+
+    /**
+     * Internal method for updating the alarm status when a sensor has been activated.
+     */
+    private void handleSensorActivated(Sensor sensor)
+    {
+        switch( securityRepository.getArmingStatus() )
+        {
+            case ARMED_AWAY -> sensor.setSensorAlarmStatus(AlarmStatus.PENDING_ALARM);
+
+            case ARMED_HOME -> sensor.setSensorAlarmStatus(AlarmStatus.ALARM);
+
+            case DISARMED -> sensor.setSensorAlarmStatus(AlarmStatus.NO_ALARM);
+        }
+        
+        statusListeners.forEach( sl -> sl.sensorStatusChanged() );
+    }
+
+    /**
+     * Internal method for updating the alarm status when a sensor has been deactivated
+     */
+    private void handleSensorDeactivated(Sensor sensor)
+    {
+        sensor.setSensorAlarmStatus(AlarmStatus.NO_ALARM);
+        
+        statusListeners.forEach( sl -> sl.sensorStatusChanged() );
+    }
+
+    /**
+     * Change the activation status for the specified sensor and update alarm status if necessary.
+     * @param sensor
+     * @param active
+     */
+    public void changeSensorActivationStatus(Sensor sensor, Boolean active)
+    {
+        sensor.setActive(active);
+        
+        SensorFeedService oldSfs = securityRepository.getSensorFeedService(Sensor sensor)
+        SensorFeedService newSfs = new SensorFeedService(this, sensor)
+        
+        boolean show = oldSfs.getShow();
+        boolean feed = oldSfs.getFeed();
+        
+        oldSfs.stopFeed();
+        
+        newSfs.setShow(show);
+        newSfs.setFeed(feed);
+        
+        pool.submit( () -> newsfs.getAndAnalyzeFeed() );
+        
+        securityRepository.updateSensor(sensor, newsfs);
+        
+        if(active)
+        {
+        	if( securityRepository.getArmingStatus() == ArmingStatus.DISARMED )
+        		securityRepository.setArmingStatus(ArmingStatus.ARMED_AWAY);
+        }
+
+        //if(active)
+        	//handleSensorActivated(sensor);
+        //else
+        	//handleSensorDeactivated(sensor);
+    }
+
+    /**
+     * Send an image to the SecurityService for processing. The securityService will use its provided
+     * ImageService to analyze the image for cats and update the alarm status accordingly.
+     * @param currentCameraImage
+     */
+    public void processImage(BufferedImage currentCameraImage)
+    {
+    	if( getArmingStatus() == ArmingStatus.DISARMED )
+		{   
+    		boolean active = getSensors().stream().anyMatch( s -> s.getActive().booleanValue()  );
+    		
+    		if(!active)
+    			return;
+    	}
+
+        catDetected(imageService.imageContainsCat(currentCameraImage, 50.0f));
+    }
+
+    public AlarmStatus getAlarmStatus() {
+        return securityRepository.getAlarmStatus();
+    }
+
+    public Set<Sensor> getSensors() {
+        return securityRepository.getSensors();
+    }
+
+    public void addSensor(Sensor sensor)
+    {
+    	securityRepository.addSensor(sensor, new SensorFeedService(this, sensor) );
+    	SensorFeedService sfs = securityRepository.getSensorFeed(sensor);
+    	pool.submit( () -> sfs.getAndAnalyzeFeed() );
+    	//pool.submit( () -> sensorServiceMap.get( sensor.getSensorId() ).getAndAnalyzeFeed() );
+    }
+
+    public void removeSensor(Sensor sensor)
+    {
+        SensorFeedService sfs = securityRepository.getSensorFeedService(sensor);
+        sfs.stopFeed();
+        securityRepository.removeSensor(sensor);
+    }
+
+    public ArmingStatus getArmingStatus() {
+        return securityRepository.getArmingStatus();
+    }
+    
+    public void setCurrentImage(BufferedImage currentCameraImage) {
+    	securityRepository.setCurrentImage(currentCameraImage);
+    }
+	
+	public BufferedImage getCurrentImage() { return securityRepository.getCurrentImage(); }
+	
+	public void setImageService(String imageService) { securityRepository.setImageService(imageService); }
+	
+	public String getImageService() { return securityRepository.getImageService(); }
+	
+	public void setState(String restore) { securityRepository.setState(restore); }
+	
+	public String getState() { return securityRepository.getState(); }
+}
+

@@ -8,6 +8,10 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.prefs.Preferences;
 
+import java.awt.image.BufferedImage;
+
+import com.udacity.catpoint.service.*;
+
 
 /**
  * Fake repository implementation for demo purposes. Stores state information in local
@@ -17,17 +21,19 @@ import java.util.prefs.Preferences;
 public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
 {
     private Set<Sensor> sensors;
-
+    private AlarmStatus alarmStatus;
     private ArmingStatus armingStatus;
+    
     private ArmingStatus prevArmingStatus;
     
     private String detectionService, restore;
     
-    private Sensor sensorFeedShow; // feed of sensor that is to be displayed
+    private BufferedImage currentCameraImage;
 
     	//preference keys
     private static final String SENSORS = "SENSORS";
-
+    private static final String SENSOR_MAP = "SENSOR_MAP";
+    private static final String ALARM_STATUS = "ALARM_STATUS";
     private static final String ARMING_STATUS = "ARMING_STATUS";
     
     private static final String PREV_ARMING_STATUS = "PREV_ARMING_STATUS";
@@ -39,6 +45,8 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
 
     private static final Preferences prefs = Preferences.userNodeForPackage(PretendDatabaseSecurityRepositoryImpl.class);
     private static final Gson gson = new Gson(); //used to serialize objects into JSON
+	
+	private Sensor sensorFeedShow; // feed of sensor that is to be displayed
 
     public PretendDatabaseSecurityRepositoryImpl()
 	{
@@ -54,7 +62,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
 				exp.printStackTrace();
 			}
 			
-			prefs.put(DETECTION_SERVICE, detectionService);
+			prefs.put(IMG_SERVICE, imageService);
 			prefs.put(STATE, restore);
 		}
 		
@@ -63,6 +71,11 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
 			// load system state from prefs, or else default
         	// alarmStatus = AlarmStatus.valueOf(prefs.get(ALARM_STATUS, AlarmStatus.NO_ALARM.toString()));
         armingStatus = ArmingStatus.valueOf(prefs.get(ARMING_STATUS, ArmingStatus.DISARMED.toString()));
+        
+        if( armingStatus == ArmingStatus.DISARMED )
+        	alarmStatus = AlarmStatus.NO_ALARM;
+        else
+        	alarmStatus = AlarmStatus.PENDING_ALARM;
 
         	// we've serialized our sensor objects for storage, which should be a good warning sign that
         	// this is likely an impractical solution for a real system
@@ -74,6 +87,16 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
         {		// create empty anonymous class, because TypeToken has a protected constructor
             Type type = new TypeToken<Set<Sensor>>() {}.getType(); 
             sensors = gson.fromJson(sensorString, type);
+        }
+        
+        String sensorMapString = prefs.get(SENSOR_MAP, null);
+
+        if(sensorMapString == null)
+            sensorMap = new HashMap<>();
+        else
+        {		// create empty anonymous class, because TypeToken has a protected constructor
+            Type type = new TypeToken< HashMap<SensorFeedService> >() {}.getType(); 
+            sensorMap = gson.fromJson(sensorMapString, type);
         }
         
         String sensorFeedShowString = prefs.get(SELECTED_FEED, null);
@@ -88,24 +111,31 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     }
 
     @Override
-    public void addSensor(Sensor sensor)
+    public void addSensor(Sensor sensor, SensorFeedService sfs)
     {
         sensors.add(sensor);
+        sensorMap.put(sensor, sfs);
+        
         prefs.put(SENSORS, gson.toJson(sensors));
+        prefs.put(SENSOR_MAP, gson.toJson(sensorMap));
     }
 
     @Override
     public void removeSensor(Sensor sensor)
     {
         sensors.remove(sensor);
+        sensorMap.remove(sensor);
+        
         prefs.put(SENSORS, gson.toJson(sensors));
+        prefs.put(SENSOR_MAP, gson.toJson(sensorMap));
     }
 
     @Override
     public void updateSensor(Sensor sensor)
     {
+        SensorFeedService sfs = getSensorFeedService(sensor)
         removeSensor(sensor)
-        addSensor(sensor)
+        addSensor(sensor, sfs)
     }
     
     @Override
@@ -121,6 +151,12 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     }
 
     @Override
+    public void setAlarmStatus(AlarmStatus alarmStatus) {
+        this.alarmStatus = alarmStatus;
+        //prefs.put(ALARM_STATUS, this.alarmStatus.toString());
+    }
+
+    @Override
     public void setArmingStatus(ArmingStatus armingStatus)
     {
         prevArmingStatus = this.armingStatus;
@@ -129,18 +165,37 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
         prefs.put(ARMING_STATUS, this.armingStatus.toString());
         prefs.put(PREV_ARMING_STATUS, prevArmingStatus.toString());
     }
-    
-    @Override
-    public void setDetectionService(String ds) {
-    	detectionService = ds;
-    	prefs.put(DETECTION_SERVICE, ds);
-    }
 
     @Override
     public Set<Sensor> getSensors() {
         return sensors;
     }
+    
+    @Override
+    public Map<Sensor, SensorFeedService> getSensorFeeds() {
+        return sensorMap;
+    }
+    
+    @Override
+    public SensorFeedService getSensorFeedService(Sensor sensor) {
+    	return sensorMap.get(sensor);
+    }
+    
+    @Override
+    public void updateSensorAlarmSatus(SensorFeedService sfs) {
+    	prefs.put(SENSOR_MAP, gson.toJson(sensorMap));
+    }
 
+    @Override
+    public AlarmStatus getAlarmStatus() {
+        return alarmStatus;
+    }
+
+    @Override
+    public ArmingStatus getArmingStatus() {
+        return armingStatus;
+    }
+    
     @Override
     public ArmingStatus getArmingStatus() {
         return armingStatus;
@@ -155,6 +210,22 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     public String getDetectionService() {
     	return detectionService;
     }
+    
+    /*@Override
+    public void setCurrentImage(BufferedImage currentCameraImage) { this.currentCameraImage = currentCameraImage;}
+    
+    @Override
+    public BufferedImage getCurrentImage() { return currentCameraImage; }
+    
+    @Override
+    public String getImageService() { return imageService; }
+    
+    @Override
+    public void setImageService(String imageService)
+    { 
+    	this.imageService = imageService;
+    	prefs.put(IMG_SERVICE, imageService);
+    }*/
     
     @Override
     public void setState(String restore)

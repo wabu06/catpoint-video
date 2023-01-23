@@ -1,7 +1,7 @@
 package com.udacity.catpoint.application;
 
-import com.udacity.catpoint.data.Sensor;
-import com.udacity.catpoint.data.SensorType;
+//import com.udacity.catpoint.data.Sensor;
+//import com.udacity.catpoint.data.SensorType;
 //import com.udacity.catpoint.service.SecurityService;
 import com.udacity.catpoint.service.*;
 
@@ -13,7 +13,13 @@ import java.util.*;
 
 //import java.util.UUID;
 
-import com.udacity.catpoint.data.AlarmStatus;
+import com.udacity.catpoint.data.*;
+
+import org.opencv.core.Mat;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 /**
  * Panel that allows users to add sensors to their system. Sensors may be
@@ -37,7 +43,9 @@ public class SensorPanel extends JPanel implements StatusListener
     public SensorPanel(SecurityService securityService)
     {
         super();
+
         setLayout(new MigLayout());
+        
         this.securityService = securityService;
         
         securityService.addStatusListener(this);
@@ -71,6 +79,19 @@ public class SensorPanel extends JPanel implements StatusListener
         p.add(addNewSensorButton, "span 3");
         return p;
     }
+    
+    private void updateFeedSelection(ActionEvent event, Sensor senor)
+    {
+    	securityService.selectFeed(sensor);
+ 
+    	for( Sensor S: securityService.getSensors() )
+    	{
+    		if( S.equals( securityService.getSelectedFeed() ) )
+    			event.getSource().setEnabled(false);
+    		else
+    			event.getSource().setEnabled(true);
+    	}
+    }
 
     /**
      * Requests the current list of sensors and updates the provided panel to display them. Sensors
@@ -80,6 +101,8 @@ public class SensorPanel extends JPanel implements StatusListener
     private void updateSensorList(JPanel p)
 	{
         p.removeAll();
+        
+        //ExecutorService pool = securityService.getPool();
 		
         securityService.getSensors().stream().sorted().forEach(s ->
 		{
@@ -88,15 +111,32 @@ public class SensorPanel extends JPanel implements StatusListener
 				String.format("%s(%s): %s", s.getName(),
 				s.getSensorType().toString(),(s.getActive() ? "Active" : "Inactive"))
 			);
+			
+			JLabel alarmStatusLabel = new JLabel();
+			
+			AlarmStatus status = securityService.getSensorFeeds.get(s).getSensorAlarmStatus();
+			
+			alarmStatusLabel.setText(status.getDescription());
+        	alarmStatusLabel.setBackground(status.getColor());
+        	alarmStatusLabel.setOpaque(true);
             
+            JButton showFeedButton = new JButton("Show This Sensor's Feed");
 			JButton sensorToggleButton = new JButton((s.getActive() ? "Deactivate" : "Activate"));
             JButton sensorRemoveButton = new JButton("Remove Sensor");
+            
+            if( s.equals( securityService.getSelectedFeed() ) )
+    			showFeedButton.setEnabled(false);
+    		else
+    			showFeedButton.setEnabled(true);
 
+            showFeedButton.addActionListener( e -> updateFeedSelection(e, s) );
             sensorToggleButton.addActionListener(e -> setSensorActivity(s, !s.getActive()) );
             sensorRemoveButton.addActionListener(e -> removeSensor(s));
 
-            //hard code some sizes, tsk tsk
-            p.add(sensorLabel, "width 300:300:300");
+	            //p.add(sensorLabel, "width 300:300:300");
+            p.add(sensorLabel, "width 100:100:100");
+            p.add(alarmStatusLabel, "width 100:100:100");
+            p.add(showFeedButton, "width 100:100:100");
             p.add(sensorToggleButton, "width 100:100:100");
             p.add(sensorRemoveButton, "wrap");
         });
@@ -110,7 +150,8 @@ public class SensorPanel extends JPanel implements StatusListener
      * @param sensor The sensor to update
      * @param isActive The sensor's activation status
      */
-    private void setSensorActivity(Sensor sensor, Boolean isActive) {
+    private void setSensorActivity(Sensor sensor, Boolean isActive)
+    {
         securityService.changeSensorActivationStatus(sensor, isActive);
         updateSensorList(sensorListPanel);
     }
@@ -163,11 +204,19 @@ public class SensorPanel extends JPanel implements StatusListener
     public void catDetected(boolean catDetected, Object[] sensors) {} // no behavior necessary
 
     @Override
-    public void sensorStatusChanged()
-    {
+    public void sensorStatusChanged() {
         updateSensorList(sensorListPanel);
     }
     
     @Override
     public void resetCameraHeaderMsg() {}
+    
+    @Override
+    public void showFeed(Mat frame) {}
+    
+    @Override
+    public void armingStatusChanged() {}
+    
+    @Override
+    void updateSystemStatus() {}
 }

@@ -6,6 +6,8 @@ import com.google.common.collect.ComparisonChain;
 import java.util.Objects;
 import java.util.UUID;
 
+
+
 /**
  * Sensor POJO. Needs to know how to sort itself for display purposes.
  */
