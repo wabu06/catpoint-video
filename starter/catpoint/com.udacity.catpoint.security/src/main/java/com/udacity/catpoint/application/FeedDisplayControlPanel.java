@@ -95,10 +95,15 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener //
         									else
         										securityService.setState("NO");
         								});
+        
+        JButton stopFeeds = new JButton("Shutdown All Feeds");
+        
+        stopFeeds.addActionListener( e -> securityService.stopAllFeeds() );
 
 		add(panelHeader, "span 3, wrap");
 		//add(cameraHeader, "span 3, wrap");
 		add(showFeedButton, "span 3, wrap");
+		add(stopFeeds, "span 3, wrap");
 		//add(imgDetector, "span 3, wrap");
 		add(imgDetector);
 		add(stateBttn, "span 3, wrap");
@@ -129,6 +134,6 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener //
     public void updateSystemStatus() {}
     
     @Override
-    public void showFeed(Mat frame, Sensor sensor) {}
+    public void showFeed(Mat frame, int sensorHash) {}
     
 }

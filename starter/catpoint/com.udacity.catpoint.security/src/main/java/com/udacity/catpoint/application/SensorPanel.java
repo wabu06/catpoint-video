@@ -93,7 +93,7 @@ public class SensorPanel extends JPanel implements StatusListener
  
     	for( Sensor S: securityService.getSensors() )
     	{
-    		if( S.equals( securityService.getSelectedFeed() ) )
+    		if( S.hashCode() == securityService.getSelectedFeed() )
     		{
 				JButton es = (JButton) event.getSource();
     			es.setEnabled(false);
@@ -137,7 +137,7 @@ public class SensorPanel extends JPanel implements StatusListener
 			JButton sensorToggleButton = new JButton((s.getActive() ? "Deactivate" : "Activate"));
             JButton sensorRemoveButton = new JButton("Remove Sensor");
             
-            if( s.equals( securityService.getSelectedFeed() ) )
+            if( s.hashCode() == securityService.getSelectedFeed() )
     			showFeedButton.setEnabled(false);
     		else
     			showFeedButton.setEnabled(true);
@@ -225,7 +225,7 @@ public class SensorPanel extends JPanel implements StatusListener
     public void resetCameraHeaderMsg() {}
     
     @Override
-    public void showFeed(Mat frame, Sensor sensor) {}
+    public void showFeed(Mat frame, int sensorHash) {}
     
     @Override
     public void armingStatusChanged() {}

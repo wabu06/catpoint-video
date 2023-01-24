@@ -23,7 +23,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     
     private String detectionService, restore;
     
-    private int sensorHash; // feed of sensor that is to be displayed
+    private Sensor sensorFeedShow; // feed of sensor that is to be displayed
 
     	//preference keys
     private static final String SENSORS = "SENSORS";
@@ -35,7 +35,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     private static final String DETECTION_SERVICE = "DETECTION_SERVICE";
     private static final String STATE = "DEFAULT";
     
-    //private static final String SELECTED_FEED = "SELECTED_FEED";
+     private static final String SELECTED_FEED = "SELECTED_FEED";
 
     private static final Preferences prefs = Preferences.userNodeForPackage(PretendDatabaseSecurityRepositoryImpl.class);
     private static final Gson gson = new Gson(); //used to serialize objects into JSON
@@ -76,7 +76,15 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
             sensors = gson.fromJson(sensorString, type);
         }
         
-        sensorHash = -1;
+        String sensorFeedShowString = prefs.get(SELECTED_FEED, null);
+        
+        if(sensorFeedShowString == null)
+        	sensorFeedShow = null;
+        else
+        {		// create empty anonymous class, because TypeToken has a protected constructor
+            Type type = new TypeToken<Sensor>() {}.getType(); 
+            sensorFeedShow = gson.fromJson(sensorFeedShowString, type);
+        }
     }
 
     @Override
@@ -101,22 +109,15 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     }
     
     @Override
-    public int selectFeed(Sensor sensor) {
-    	sensorHash = sensor.hashCode();
-    	return sensorHash;
-    }
-    
-    @Override
-    public int unSelectFeed()
+    public void selectFeed(Sensor sensor)
     {
-    	int hash = sensorHash;
-    	sensorHash = -1;
-    	return hash;
+    	sensorFeedShow = sensor;
+    	prefs.put( SELECTED_FEED, gson.toJson(sensorFeedShow) );
     }
     
     @Override
-    public int getSelectedFeed() {
-    	return sensorHash;
+    public Sensor getSelectedFeed() {
+    	return sensorFeedShow;
     }
 
     @Override

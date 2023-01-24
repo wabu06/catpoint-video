@@ -35,6 +35,7 @@ public class SensorFeedService
 	private SecurityService securityService;
 	
 	private Sensor sensor;
+	private int sensorHash;
 	
 	private AlarmStatus sensorAlarmStatus;
 	
@@ -56,6 +57,7 @@ public class SensorFeedService
 		this.securityService = ss;
 
 		this.sensor = sensor;
+		this.sensorHash = sensor.hashCode();
 		
 		show = false;
 		feed = true;
@@ -180,7 +182,7 @@ public class SensorFeedService
 				// show currently selected feed
 			//if( sensor.equals( ss.getSelectedFeed().getSensor() ))
 			
-			securityService.getStatusListeners().forEach( sl -> sl.showFeed(frame, sensor) );
+			securityService.getStatusListeners().forEach( sl -> sl.showFeed(frame, sensorHash) );
 		}
 	}
 }

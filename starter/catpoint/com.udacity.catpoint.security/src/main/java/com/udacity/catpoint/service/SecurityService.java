@@ -70,6 +70,12 @@ public class SecurityService
     	return i + 1;
     }
     
+    public void stopAllFeeds()
+    {
+    	sensorServiceMap.forEach( (s, sfs) -> sfs.stopFeed() );
+    	pool.shutdown();
+    }
+    
     private void initSensorServiceMap()
     {
     	sensorServiceMap = new HashMap<>();
@@ -129,12 +135,16 @@ public class SecurityService
     	return statusListeners;
     }
     
-    public Sensor getSelectedFeed() {
+    public int getSelectedFeed() {
     	return securityRepository.getSelectedFeed();
     }
     
-    public void selectFeed(Sensor sensor) {
-    	securityRepository.selectFeed(sensor);
+    public int selectFeed(Sensor sensor) {
+    	return securityRepository.selectFeed(sensor);
+    }
+    
+    public int unSelectFeed() {
+    	return securityRepository.unSelectFeed();
     }
 
     /**
@@ -170,6 +180,9 @@ public class SecurityService
 
     public void removeSensor(Sensor sensor)
     {
+        if( sensor.hashCode() == getSelectedFeed() )
+        	unSelectFeed();
+
         SensorFeedService sfs = sensorServiceMap.remove(sensor);
         sfs.stopFeed();
         securityRepository.removeSensor(sensor);

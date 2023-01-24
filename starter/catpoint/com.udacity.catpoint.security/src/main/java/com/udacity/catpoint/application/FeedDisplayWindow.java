@@ -121,11 +121,11 @@ public class FeedDisplayWindow implements StatusListener
     public void armingStatusChanged() {}
     
     @Override
-    public void showFeed(Mat frame, Sensor sensor)
+    public void showFeed(Mat frame, int sensorHash)
 	{
 		//Imgproc.putText(frame, elapse.toString(), new Point(10, 50), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 255, 255), 2);
 		
-		if( !sensor.equals( securityService.getSelectedFeed() ) )
+		if( sensorHash != securityService.getSelectedFeed() )
 			return;
 					
 		MatOfByte mob = new MatOfByte();

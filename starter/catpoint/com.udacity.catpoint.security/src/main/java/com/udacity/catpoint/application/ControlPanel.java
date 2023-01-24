@@ -87,7 +87,7 @@ public class ControlPanel extends JPanel implements StatusListener
     public void resetCameraHeaderMsg() {}
     
     @Override
-    public void showFeed(Mat frame, Sensor sensor) {}
+    public void showFeed(Mat frame, int sensorHash) {}
     
     @Override
     public void armingStatusChanged()

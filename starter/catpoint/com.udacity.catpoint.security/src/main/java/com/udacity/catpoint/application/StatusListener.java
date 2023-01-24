@@ -15,7 +15,7 @@ public interface StatusListener
     void catDetected(boolean cat, Sensor sensor);
     void sensorStatusChanged();
     void resetCameraHeaderMsg();
-    void showFeed(Mat frame, Sensor sensor);
+    void showFeed(Mat frame, int sensorHash);
     void armingStatusChanged();
     void updateSystemStatus();
 }
