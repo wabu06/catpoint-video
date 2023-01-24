@@ -35,7 +35,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     private static final String DETECTION_SERVICE = "DETECTION_SERVICE";
     private static final String STATE = "DEFAULT";
     
-     private static final String SELECTED_FEED = "SELECTED_FEED"
+     private static final String SELECTED_FEED = "SELECTED_FEED";
 
     private static final Preferences prefs = Preferences.userNodeForPackage(PretendDatabaseSecurityRepositoryImpl.class);
     private static final Gson gson = new Gson(); //used to serialize objects into JSON
@@ -104,8 +104,8 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     @Override
     public void updateSensor(Sensor sensor)
     {
-        removeSensor(sensor)
-        addSensor(sensor)
+        removeSensor(sensor);
+        addSensor(sensor);
     }
     
     @Override

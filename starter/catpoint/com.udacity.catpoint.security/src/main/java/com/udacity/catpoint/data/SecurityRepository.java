@@ -12,7 +12,7 @@ public interface SecurityRepository
     void removeSensor(Sensor sensor);
     void updateSensor(Sensor sensor);
     void selectFeed(Sensor sensor);
-    SensorFeed getSelectFeed();
+    Sensor getSelectedFeed();
     void setArmingStatus(ArmingStatus armingStatus);
     Set<Sensor> getSensors();
     ArmingStatus getArmingStatus();

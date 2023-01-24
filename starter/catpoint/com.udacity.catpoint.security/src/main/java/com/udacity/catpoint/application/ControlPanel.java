@@ -1,8 +1,8 @@
 package com.udacity.catpoint.application;
 
-import com.udacity.catpoint.data.ArmingStatus;
-import com.udacity.catpoint.service.SecurityService;
-import com.udacity.catpoint.service.StyleService;
+import com.udacity.catpoint.data.*;
+import com.udacity.catpoint.service.*;
+//import com.udacity.catpoint.service.StyleService;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -48,7 +48,11 @@ public class ControlPanel extends JPanel implements StatusListener
 			{
                 boolean active = securityService.getSensors().stream().anyMatch( s -> s.getActive().booleanValue()  );
     		
-    			if(!active) return;
+    			if(!active)
+    			{
+    				if( securityService.getArmingStatus() == ArmingStatus.DISARMED )
+    					return;
+    			} 
                 
                 buttonMap.get( securityService.getArmingStatus() ).setEnabled(true);
                 buttonMap.get( securityService.getArmingStatus() ).setForeground​(Color.black);
@@ -74,7 +78,7 @@ public class ControlPanel extends JPanel implements StatusListener
     public void notify(AlarmStatus status) {} // no behavior necessary
 
     @Override
-    public void catDetected(boolean catDetected, Object[] sensors) {} // no behavior necessary
+    public void catDetected(boolean catDetected, Sensor sensor) {} // no behavior necessary
 
     @Override
     public void sensorStatusChanged() {}
@@ -83,7 +87,7 @@ public class ControlPanel extends JPanel implements StatusListener
     public void resetCameraHeaderMsg() {}
     
     @Override
-    public void showFeed(Mat frame) {}
+    public void showFeed(Mat frame, Sensor sensor) {}
     
     @Override
     public void armingStatusChanged()
@@ -98,4 +102,7 @@ public class ControlPanel extends JPanel implements StatusListener
     	buttonMap.get(currentStatus).setBackground( currentStatus.getColor() );
         buttonMap.get(currentStatus).setEnabled(false);
     }
+    
+    @Override
+    public void updateSystemStatus() {}
 }

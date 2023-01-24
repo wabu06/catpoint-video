@@ -9,5 +9,7 @@ module com.udacity.catpoint.image
 	requires software.amazon.awssdk.regions;
 	requires software.amazon.awssdk.services.rekognition;
 	
+	requires opencv;
+	
 	opens com.udacity.detection.service;
 }

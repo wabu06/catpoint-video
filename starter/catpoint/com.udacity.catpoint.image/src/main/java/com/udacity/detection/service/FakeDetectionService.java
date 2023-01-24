@@ -22,9 +22,7 @@ import javax.swing.JOptionPane;
  */
 public class FakeDetectionService implements DetectionService
 {
-    private final Random r = new Random();
-	
-	
+    private final Random rng = new Random();
 	
 	public FakeDetectionService()
 	{
@@ -35,9 +33,7 @@ public class FakeDetectionService implements DetectionService
 	public boolean frameContainsCat(Mat frame, float confidenceThreshhold)
 	{
 		//return (r.nextFloat()*confidenceThreshhold) > (0.7*confidenceThreshhold);
-		
-		
-		
-		return 
+
+		return false;
     }
 }

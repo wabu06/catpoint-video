@@ -6,7 +6,7 @@ import com.udacity.catpoint.data.SecurityRepository;
 //import com.udacity.catpoint.service.SecurityService;
 import com.udacity.catpoint.service.*;
 
-import com.udacity.image.service.*;
+//import com.udacity.detection.service.*;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -62,9 +62,7 @@ public class CatpointGui extends JFrame
 		//setLocation(50, 50);
         //setSize(600, 850);
         
-        setLocation(-600, -720);
-        
-		setSize(600, 720);
+		setSize(390, 720);
         setTitle("NoCats");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -89,7 +87,7 @@ public class CatpointGui extends JFrame
         getContentPane().add(mainPanel);
     }
     
-    public JFrame getFeedDisplay {
+    public JFrame getFeedDisplay() {
     	return fdw.getDisplayFrame();
     }
 }

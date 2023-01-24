@@ -13,5 +13,5 @@ public interface DetectionService
 {
 	static final Logger log = LoggerFactory.getLogger(DetectionService.class);
 	
-	public boolean frameContainsCat(Mat frame, float confidenceThreshhold);
+	boolean frameContainsCat(Mat frame, float confidenceThreshhold);
 }

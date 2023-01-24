@@ -9,6 +9,8 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 
+import java.awt.event.ActionEvent;
+
 import java.util.*;
 
 //import java.util.UUID;
@@ -76,20 +78,31 @@ public class SensorPanel extends JPanel implements StatusListener
         p.add(newSensorNameField, "width 50:100:200");
         p.add(newSensorType);
         p.add(newSensorTypeDropdown, "wrap");
-        p.add(addNewSensorButton, "span 3");
+        p.add(addNewSensorButton, "span 3, wrap");
+        
+        JLabel sensorLabel = new JLabel("Sensors:");
+        sensorLabel.setFont(StyleService.SUB_HEADING_FONT);
+        p.add(sensorLabel);
+        
         return p;
     }
     
-    private void updateFeedSelection(ActionEvent event, Sensor senor)
+    private void updateFeedSelection(ActionEvent event, Sensor sensor)
     {
     	securityService.selectFeed(sensor);
  
     	for( Sensor S: securityService.getSensors() )
     	{
     		if( S.equals( securityService.getSelectedFeed() ) )
-    			event.getSource().setEnabled(false);
+    		{
+				JButton es = (JButton) event.getSource();
+    			es.setEnabled(false);
+    		}
     		else
-    			event.getSource().setEnabled(true);
+    		{
+    			JButton es = (JButton) event.getSource();
+    			es.setEnabled(true);
+    		}
     	}
     }
 
@@ -114,13 +127,13 @@ public class SensorPanel extends JPanel implements StatusListener
 			
 			JLabel alarmStatusLabel = new JLabel();
 			
-			AlarmStatus status = securityService.getSensorFeeds.get(s).getSensorAlarmStatus();
+			AlarmStatus status = securityService.getSensorFeeds().get(s).getSensorAlarmStatus();
 			
 			alarmStatusLabel.setText(status.getDescription());
         	alarmStatusLabel.setBackground(status.getColor());
         	alarmStatusLabel.setOpaque(true);
             
-            JButton showFeedButton = new JButton("Show This Sensor's Feed");
+            JButton showFeedButton = new JButton( String.format("%s %s %s", "Show", s.getName(), "Sensor Feed") );
 			JButton sensorToggleButton = new JButton((s.getActive() ? "Deactivate" : "Activate"));
             JButton sensorRemoveButton = new JButton("Remove Sensor");
             
@@ -135,8 +148,8 @@ public class SensorPanel extends JPanel implements StatusListener
 
 	            //p.add(sensorLabel, "width 300:300:300");
             p.add(sensorLabel, "width 100:100:100");
+            p.add(showFeedButton, "width 100:100:100, wrap");
             p.add(alarmStatusLabel, "width 100:100:100");
-            p.add(showFeedButton, "width 100:100:100");
             p.add(sensorToggleButton, "width 100:100:100");
             p.add(sensorRemoveButton, "wrap");
         });
@@ -201,7 +214,7 @@ public class SensorPanel extends JPanel implements StatusListener
     public void notify(AlarmStatus status) {} // no behavior necessary
 
     @Override
-    public void catDetected(boolean catDetected, Object[] sensors) {} // no behavior necessary
+    public void catDetected(boolean catDetected, Sensor sensor) {} // no behavior necessary
 
     @Override
     public void sensorStatusChanged() {
@@ -212,11 +225,11 @@ public class SensorPanel extends JPanel implements StatusListener
     public void resetCameraHeaderMsg() {}
     
     @Override
-    public void showFeed(Mat frame) {}
+    public void showFeed(Mat frame, Sensor sensor) {}
     
     @Override
     public void armingStatusChanged() {}
     
     @Override
-    void updateSystemStatus() {}
+    public void updateSystemStatus() {}
 }

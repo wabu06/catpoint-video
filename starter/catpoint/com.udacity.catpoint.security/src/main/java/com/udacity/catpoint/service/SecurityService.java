@@ -22,6 +22,11 @@ import java.lang.reflect.Proxy;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import java.time.Instant;
+
+import java.util.stream.Stream;
+import java.util.stream.IntStream;
+
 
 /**
  * Service that receives information about changes to the security system. Responsible for
@@ -37,6 +42,10 @@ public class SecurityService
     
     private Map<Sensor, SensorFeedService> sensorServiceMap;
     
+    private Random RNG;
+    
+    private boolean[] select = new boolean[] {false, false, false, false};
+    
     private ExecutorService pool;
 
 	public SecurityService(SecurityRepository securityRepository)
@@ -45,14 +54,27 @@ public class SecurityService
 		
 		pool = Executors.newFixedThreadPool​(4);
 		
+		RNG = new Random( Instant.now().toEpochMilli() );
+		
 		initSensorServiceMap();
+    }
+    
+    public int getRandNum()
+    {
+    	int i;
+    	
+    	do { i = RNG.nextInt(4);  } while( select[i] );
+    	
+    	select[i] = true;
+    	
+    	return i + 1;
     }
     
     private void initSensorServiceMap()
     {
     	sensorServiceMap = new HashMap<>();
     	
-    	Set<Sensor> sensors = securityRepository.getSensors()
+    	Set<Sensor> sensors = securityRepository.getSensors();
     	
     	for(Sensor S: sensors)
     	{
@@ -82,7 +104,8 @@ public class SecurityService
 		{
 			sensorServiceMap.forEach( (s, sfs) -> sfs.setSensorAlarmStatus(AlarmStatus.NO_ALARM) );
 			getSensors().forEach( s -> s.setActive(Boolean.FALSE) );
-			statusListeners.forEach( sl -> { sl.sensorStatusChanged(); sl.resetCameraHeaderMsg(); } );
+			//statusListeners.forEach( sl -> { sl.sensorStatusChanged(); sl.resetCameraHeaderMsg(); } );
+			statusListeners.forEach( sl -> sl.sensorStatusChanged() );
 		}
 
         securityRepository.setArmingStatus(armingStatus);
@@ -160,7 +183,11 @@ public class SecurityService
     	return securityRepository.getPrevArmingStatus();
     }
     
-    public String getDetectionService () {
+    public void setDetectionService(String ds) {
+    	securityRepository.setDetectionService(ds);
+    }
+    
+    public String getDetectionService() {
     	return securityRepository.getDetectionService();
     }
 	

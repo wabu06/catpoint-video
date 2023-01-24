@@ -23,8 +23,8 @@ public class FeedDisplayWindow implements StatusListener
 	
 	private SecurityService securityService;
 	
-	private int IMAGE_WIDTH;
-	private int IMAGE_HEIGHT; 
+	private int IMAGE_WIDTH = 950; //640;
+	private int IMAGE_HEIGHT = 535; //360; 
 	
 	private JLabel displayLabel;
 	private JPanel displayPanel;
@@ -38,16 +38,32 @@ public class FeedDisplayWindow implements StatusListener
 		securityService.addStatusListener(this);
 
 		displayLabel = new JLabel();
+		displayLabel.setSize( new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT) );
 		displayLabel.setBackground(Color.WHITE);
 		
-		displayPanel = new JPanel();
+		try
+		{
+			BufferedImage buffImg = ImageIO.read( new File("cameraFeeds/color-bar.png") );
+			
+			Image tmp = new ImageIcon(buffImg).getImage();
 		
+			displayLabel.setIcon( new ImageIcon( tmp.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH) ) );
+			displayLabel.repaint();
+		}
+		catch(Exception exp) {
+			exp.printStackTrace();
+		}
+
+		displayPanel = new JPanel();
 		BoxLayout displayPanelLayout = new BoxLayout(displayPanel, BoxLayout.PAGE_AXIS);
 		displayPanel.setLayout( displayPanelLayout );
+		displayPanel.setSize( new Dimension(IMAGE_WIDTH + 10, IMAGE_HEIGHT + 45) );
+		displayPanel.add(displayLabel);
 		
 		displayFrame = new JFrame("Feed Display"); // "Motion Sensor Feed"
-		
+		displayFrame.setSize( new Dimension(IMAGE_WIDTH + 10, IMAGE_HEIGHT + 45) );
 		displayFrame.add(displayPanel);
+		
 		//displayFrame.setVisible(true);
 		
 		System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
@@ -90,7 +106,7 @@ public class FeedDisplayWindow implements StatusListener
     public void notify(AlarmStatus status) {} // no behavior necessary
 
     @Override
-    public void catDetected(boolean catDetected, Object[] sensors) {} // no behavior necessary
+    public void catDetected(boolean catDetected, Sensor sensor) {} // no behavior necessary
 
     @Override
     public void sensorStatusChanged() {}
@@ -99,7 +115,13 @@ public class FeedDisplayWindow implements StatusListener
     public void resetCameraHeaderMsg() {}
     
     @Override
-    private void showFeed(Mat frame, Sensor sensor)
+    public void updateSystemStatus() {}
+
+    @Override
+    public void armingStatusChanged() {}
+    
+    @Override
+    public void showFeed(Mat frame, Sensor sensor)
 	{
 		//Imgproc.putText(frame, elapse.toString(), new Point(10, 50), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 255, 255), 2);
 		

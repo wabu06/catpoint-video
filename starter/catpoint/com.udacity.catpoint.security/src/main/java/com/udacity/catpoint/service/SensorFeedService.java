@@ -69,9 +69,9 @@ public class SensorFeedService
 			new DetectionServiceHandler( securityService.getRepository() )
 		);
 		
-		this.feedSource = null;
+		this.feedSource = null; getFeedSource();
 		
-		//System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
+		System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
 		
 		capture = new VideoCapture(); 
 
@@ -83,6 +83,10 @@ public class SensorFeedService
 			show = false;
 			//System.exit(0);
 		}
+	}
+	
+	private void getFeedSource() {
+		feedSource = "cameraFeeds/feed" + securityService.getRandNum() + ".mp4";
 	}
 	
 	public void setFeed(boolean feed) { this.feed = feed; }
@@ -103,7 +107,7 @@ public class SensorFeedService
 		return sensor.getSensorId();
 	}
 
-	private void setSensorAlarmStatus(AlarmStatus status)
+	public void setSensorAlarmStatus(AlarmStatus status)
     {
         sensorAlarmStatus = status;
         //ss.statusListeners.forEach(sl -> sl.notify(status));
@@ -123,7 +127,7 @@ public class SensorFeedService
         	{
             	case ARMED_HOME -> setSensorAlarmStatus(AlarmStatus.ALARM);
             	
-            	case ARMED_AWAY -> setSensorAlarmStatus(AlarmStatus.PENDING_ALARM);; 
+            	case ARMED_AWAY -> setSensorAlarmStatus(AlarmStatus.PENDING_ALARM); 
             	
             	case DISARMED -> setSensorAlarmStatus(AlarmStatus.NO_ALARM);
             };
@@ -133,8 +137,8 @@ public class SensorFeedService
         
         //securityService.updateSensorAlarmSatus(this);
         	
-        securityService.getStatusListeners.forEach( sl -> sl.catDetected(cat, sensor) );
-        securityService.getStatusListeners.forEach( sl -> sl.sensorStatusChanged() );
+        securityService.getStatusListeners().forEach( sl -> sl.catDetected(cat, sensor) );
+        securityService.getStatusListeners().forEach( sl -> sl.sensorStatusChanged() );
     }
 	
 	private void processFrame(Mat frame)
@@ -176,7 +180,7 @@ public class SensorFeedService
 				// show currently selected feed
 			//if( sensor.equals( ss.getSelectedFeed().getSensor() ))
 			
-			securityService.getStatusListeners.forEach( sl -> sl.showFeed(frame, sensor) );
+			securityService.getStatusListeners().forEach( sl -> sl.showFeed(frame, sensor) );
 		}
 	}
 }

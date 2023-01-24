@@ -1,6 +1,6 @@
 package com.udacity.catpoint.application;
 
-import com.udacity.catpoint.data.AlarmStatus;
+import com.udacity.catpoint.data.*;
 
 import org.opencv.core.Mat;
 
@@ -15,7 +15,7 @@ public interface StatusListener
     void catDetected(boolean cat, Sensor sensor);
     void sensorStatusChanged();
     void resetCameraHeaderMsg();
-    void showFeed(Mat frame);
+    void showFeed(Mat frame, Sensor sensor);
     void armingStatusChanged();
     void updateSystemStatus();
 }

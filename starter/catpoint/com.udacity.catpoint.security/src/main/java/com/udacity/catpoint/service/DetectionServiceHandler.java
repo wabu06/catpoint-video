@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 import com.udacity.catpoint.data.*;
-import com.udacity.image.service.*;
+import com.udacity.detection.service.*;
 
 
 public class DetectionServiceHandler implements InvocationHandler

@@ -1,8 +1,8 @@
 package com.udacity.catpoint.application;
 
-import com.udacity.catpoint.data.AlarmStatus;
-import com.udacity.catpoint.service.SecurityService;
-import com.udacity.catpoint.service.StyleService;
+import com.udacity.catpoint.data.*;
+import com.udacity.catpoint.service.*;
+//import com.udacity.catpoint.service.StyleService;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -16,11 +16,17 @@ import org.opencv.core.Mat;
 public class DisplayPanel extends JPanel implements StatusListener {
 
     private JLabel currentStatusLabel;
+    
+    private JLabel detectMsg;
+    
+    private SecurityService securityService;
 
     public DisplayPanel(SecurityService securityService)
     {
         super();
         setLayout(new MigLayout());
+        
+        this.securityService = securityService;
 
         securityService.addStatusListener(this);
 
@@ -33,10 +39,13 @@ public class DisplayPanel extends JPanel implements StatusListener {
         //notify(securityService.getAlarmStatus());
         
         updateSystemStatus();
+        
+        detectMsg = new JLabel("No Cats Detected As Yet");
 
         add(panelLabel, "span 2, wrap");
         add(systemStatusLabel);
         add(currentStatusLabel, "wrap");
+        add(detectMsg, "span 3, wrap");
 
     }
 
@@ -49,7 +58,13 @@ public class DisplayPanel extends JPanel implements StatusListener {
     }
 
     @Override
-    public void catDetected(boolean catDetected, Sensor sensor) {} // no behavior necessary
+    public void catDetected(boolean cat, Sensor sensor)
+    {
+    	if(cat)
+        	detectMsg.setText( "DANGER - CAT DETECTED" + Character.toString(0x1F63C) + sensor.getSensorType().toString() );
+        else
+            detectMsg.setText("No Cats Detected");
+    }
 
     @Override
     public void sensorStatusChanged() {} // no behavior necessary
@@ -58,13 +73,13 @@ public class DisplayPanel extends JPanel implements StatusListener {
     public void resetCameraHeaderMsg() {}
     
     @Override
-    void showFeed(Mat frame) {}
+    public void showFeed(Mat frame, Sensor sensor) {}
     
     @Override
-    void armingStatusChanged() {}
+    public void armingStatusChanged() {}
     
     @Override
-    void updateSystemStatus()
+    public void updateSystemStatus()
     {
     	ArmingStatus status = securityService.getArmingStatus();
     	
