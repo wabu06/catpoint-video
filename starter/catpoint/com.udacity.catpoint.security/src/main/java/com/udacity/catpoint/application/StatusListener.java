@@ -13,9 +13,10 @@ public interface StatusListener
 {
     void notify(AlarmStatus status);
     void catDetected(boolean cat, Sensor sensor);
-    void sensorStatusChanged();
+    void sensorStatusChanged(Sensor sensor);
     void resetCameraHeaderMsg();
     void showFeed(Mat frame, int sensorHash);
     void armingStatusChanged();
     void updateSystemStatus();
+    void sensorReset();
 }

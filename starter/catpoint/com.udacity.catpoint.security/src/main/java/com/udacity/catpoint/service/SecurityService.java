@@ -59,6 +59,10 @@ public class SecurityService
 		initSensorServiceMap();
     }
     
+    public Random getRNG() {
+    	return RNG;
+    }
+    
     public int getRandNum()
     {
     	int i;
@@ -73,7 +77,7 @@ public class SecurityService
     public void stopAllFeeds()
     {
     	sensorServiceMap.forEach( (s, sfs) -> sfs.stopFeed() );
-    	pool.shutdown();
+    	unSelectFeed(); pool.shutdown();
     }
     
     private void initSensorServiceMap()
@@ -110,8 +114,9 @@ public class SecurityService
 		{
 			sensorServiceMap.forEach( (s, sfs) -> sfs.setSensorAlarmStatus(AlarmStatus.NO_ALARM) );
 			getSensors().forEach( s -> s.setActive(Boolean.FALSE) );
-			//statusListeners.forEach( sl -> { sl.sensorStatusChanged(); sl.resetCameraHeaderMsg(); } );
-			statusListeners.forEach( sl -> sl.sensorStatusChanged() );
+			
+			statusListeners.forEach( sl -> sl.sensorReset() );
+			//statusListeners.forEach( sl -> sl.sensorStatusChanged() );
 		}
 
         securityRepository.setArmingStatus(armingStatus);

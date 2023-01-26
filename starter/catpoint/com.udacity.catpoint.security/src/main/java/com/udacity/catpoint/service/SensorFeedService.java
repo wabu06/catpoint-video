@@ -41,7 +41,7 @@ public class SensorFeedService
 	
 	private boolean show;
 	private boolean feed;
-	
+
 	private DetectionService detectionService;
 	
 	//private FeedDisplayWindow fdw = FeedDisplayWindow.getInstance();
@@ -61,14 +61,14 @@ public class SensorFeedService
 		
 		show = false;
 		feed = true;
-		
+
 		sensorAlarmStatus = AlarmStatus.NO_ALARM;
 		
 		this.detectionService = (DetectionService) Proxy.newProxyInstance
 		(
 			SecurityService.class.getClassLoader(),
 			new Class<?>[] { DetectionService.class },
-			new DetectionServiceHandler( securityService.getRepository() )
+			new DetectionServiceHandler(securityService)
 		);
 		
 		this.feedSource = null; getFeedSource();
@@ -109,10 +109,12 @@ public class SensorFeedService
 		return sensor.getSensorId();
 	}
 
-	public void setSensorAlarmStatus(AlarmStatus status)
-    {
+	public void setSensorAlarmStatus(AlarmStatus status, Boolean cat) {
         sensorAlarmStatus = status;
-        //ss.statusListeners.forEach(sl -> sl.notify(status));
+    }
+    
+    public void setSensorAlarmStatus(AlarmStatus status) {
+    	sensorAlarmStatus = status;
     }
     
     public AlarmStatus getSensorAlarmStatus() {
@@ -121,8 +123,6 @@ public class SensorFeedService
 	
 	private void catDetected(Boolean cat)
 	{
-		//Object[] sensors = getSensors().stream().filter( s -> s.getActive() ).toArray();
-		
         if(cat)
         {
         	switch( securityService.getArmingStatus() )
@@ -136,11 +136,9 @@ public class SensorFeedService
         }
         else
         	setSensorAlarmStatus(AlarmStatus.NO_ALARM);
-        
-        //securityService.updateSensorAlarmSatus(this);
-        	
+
         securityService.getStatusListeners().forEach( sl -> sl.catDetected(cat, sensor) );
-        securityService.getStatusListeners().forEach( sl -> sl.sensorStatusChanged() );
+        securityService.getStatusListeners().forEach( sl -> sl.sensorStatusChanged(sensor) );
     }
 	
 	private void processFrame(Mat frame)

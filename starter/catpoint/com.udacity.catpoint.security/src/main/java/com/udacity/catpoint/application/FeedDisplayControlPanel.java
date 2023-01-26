@@ -113,19 +113,13 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener //
     public void notify(AlarmStatus status) {} //no behavior necessary
 
     @Override
-    public void catDetected(boolean cat, Sensor sensor)
-	{
-        //if(cat)
-        	//cameraHeader.setText( "DANGER - CAT DETECTED" + Character.toString(0x1F63C) + sensor.getSensorType().toString() );
-        //else
-            //cameraHeader.setText("No Cats Detected");
-    }
+    public void catDetected(boolean cat, Sensor sensor) {}
 
     @Override
-    public void sensorStatusChanged() {} //no behavior necessary
+    public void sensorStatusChanged(Sensor sensor) {} //no behavior necessary
     
     @Override
-    public void resetCameraHeaderMsg() { /*cameraHeader.setText("Camera Feed");*/ }
+    public void resetCameraHeaderMsg() {}
 	
 	@Override
     public void armingStatusChanged() {}
@@ -136,4 +130,6 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener //
     @Override
     public void showFeed(Mat frame, int sensorHash) {}
     
+    @Override
+    public void sensorReset() {}
 }

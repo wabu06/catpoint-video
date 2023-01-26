@@ -41,8 +41,6 @@ public class SensorPanel extends JPanel implements StatusListener
 
     private JPanel sensorListPanel;
     private JPanel newSensorPanel;
-    
-    private Map<Sensor, JLabel> labelMap;
 
     public SensorPanel(SecurityService securityService)
     {
@@ -53,8 +51,6 @@ public class SensorPanel extends JPanel implements StatusListener
         this.securityService = securityService;
         
         securityService.addStatusListener(this);
-        
-        labelMap = new HashMap<>();
 
         panelLabel.setFont(StyleService.HEADING_FONT);
         addNewSensorButton.addActionListener(e ->
@@ -96,6 +92,23 @@ public class SensorPanel extends JPanel implements StatusListener
     	securityService.selectFeed(sensor);
     	
     	updateSensorList(sensorListPanel);
+    	
+    	//JButton es = (JButton) event.getSource();
+    	//es.setEnabled(false);
+ 
+    	/*for( Sensor S: securityService.getSensors() )
+    	{
+    		if( S.hashCode() == securityService.getSelectedFeed() )
+    		{
+				JButton es = (JButton) event.getSource();
+    			es.setEnabled(false);
+    		}
+    		else
+    		{
+    			JButton es = (JButton) event.getSource();
+    			es.setEnabled(true);
+    		}
+    	}*/
     }
 
     /**
@@ -106,8 +119,6 @@ public class SensorPanel extends JPanel implements StatusListener
     private void updateSensorList(JPanel p)
 	{
         p.removeAll();
-        
-        labelMap.clear();
         
         //ExecutorService pool = securityService.getPool();
 		
@@ -126,8 +137,6 @@ public class SensorPanel extends JPanel implements StatusListener
 			alarmStatusLabel.setText(status.getDescription());
         	alarmStatusLabel.setBackground(status.getColor());
         	alarmStatusLabel.setOpaque(true);
-        	
-        	labelMap.put(s, alarmStatusLabel);
             
             JButton showFeedButton = new JButton( String.format("%s %s %s", "Show", s.getSensorType().toString(), "Sensor Feed") );
 			JButton sensorToggleButton = new JButton((s.getActive() ? "Deactivate" : "Activate"));
@@ -145,11 +154,8 @@ public class SensorPanel extends JPanel implements StatusListener
 	            //p.add(sensorLabel, "width 300:300:300");
             p.add(sensorLabel, "span 1"); // p.add(sensorLabel, "width 100:100:100");
             p.add(showFeedButton, "span 1, wrap"); // p.add(showFeedButton, "width 100:100:100, wrap");
-            	// p.add(alarmStatusLabel, "width 100:100:100");
-            p.add(alarmStatusLabel);
-            	// p.add(sensorToggleButton, "width 100:100:100");
-            p.add(sensorToggleButton);
-            	// p.add(sensorRemoveButton, "width 100:100:100, wrap");
+            p.add(alarmStatusLabel, "width 100:100:100");
+            p.add(sensorToggleButton, "width 100:100:100");
             p.add(sensorRemoveButton, "wrap");
         });
 
@@ -165,10 +171,6 @@ public class SensorPanel extends JPanel implements StatusListener
     private void setSensorActivity(Sensor sensor, Boolean isActive)
     {
         securityService.changeSensorActivationStatus(sensor, isActive);
-        
-        if(!isActive)
-        	securityService.getSensorFeeds().get(sensor).setSensorAlarmStatus(AlarmStatus.NO_ALARM);
-        
         updateSensorList(sensorListPanel);
     }
 
@@ -219,19 +221,9 @@ public class SensorPanel extends JPanel implements StatusListener
     @Override
     public void catDetected(boolean catDetected, Sensor sensor) {} // no behavior necessary
 
-    /*@Override
+    @Override
     public void sensorStatusChanged() {
         updateSensorList(sensorListPanel);
-    }*/
-    
-    @Override
-    public void sensorStatusChanged(Sensor sensor)
-    {
-        AlarmStatus status = securityService.getSensorFeeds().get(sensor).getSensorAlarmStatus();
-			
-		labelMap.get(sensor).setText(status.getDescription());
-       	labelMap.get(sensor).setBackground(status.getColor());
-       	labelMap.get(sensor).setOpaque(true);
     }
     
     @Override
@@ -245,11 +237,4 @@ public class SensorPanel extends JPanel implements StatusListener
     
     @Override
     public void updateSystemStatus() {}
-    
-    @Override
-    public void sensorReset() {
-    	updateSensorList(sensorListPanel);
-    }
-    
-    public void enableAddSensor(boolean enable) {}
 }

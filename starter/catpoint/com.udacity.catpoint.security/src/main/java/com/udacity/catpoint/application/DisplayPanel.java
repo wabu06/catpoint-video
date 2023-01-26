@@ -67,7 +67,7 @@ public class DisplayPanel extends JPanel implements StatusListener {
     }
 
     @Override
-    public void sensorStatusChanged() {} // no behavior necessary
+    public void sensorStatusChanged(Sensor sensor) {} // no behavior necessary
     
     @Override
     public void resetCameraHeaderMsg() {}
@@ -87,4 +87,7 @@ public class DisplayPanel extends JPanel implements StatusListener {
         currentStatusLabel.setBackground(status.getColor());
         currentStatusLabel.setOpaque(true);
     }
+    
+    @Override
+    public void sensorReset() {}
 }

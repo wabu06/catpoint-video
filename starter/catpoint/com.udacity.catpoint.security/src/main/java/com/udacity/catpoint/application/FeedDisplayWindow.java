@@ -109,7 +109,7 @@ public class FeedDisplayWindow implements StatusListener
     public void catDetected(boolean catDetected, Sensor sensor) {} // no behavior necessary
 
     @Override
-    public void sensorStatusChanged() {}
+    public void sensorStatusChanged(Sensor sensor) {}
     
     @Override
     public void resetCameraHeaderMsg() {}
@@ -119,6 +119,9 @@ public class FeedDisplayWindow implements StatusListener
 
     @Override
     public void armingStatusChanged() {}
+    
+    @Override
+    public void sensorReset() {}
     
     @Override
     public void showFeed(Mat frame, int sensorHash)

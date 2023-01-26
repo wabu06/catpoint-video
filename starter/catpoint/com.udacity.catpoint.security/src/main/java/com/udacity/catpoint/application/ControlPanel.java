@@ -81,7 +81,7 @@ public class ControlPanel extends JPanel implements StatusListener
     public void catDetected(boolean catDetected, Sensor sensor) {} // no behavior necessary
 
     @Override
-    public void sensorStatusChanged() {}
+    public void sensorStatusChanged(Sensor sensor) {}
     
     @Override
     public void resetCameraHeaderMsg() {}
@@ -105,4 +105,7 @@ public class ControlPanel extends JPanel implements StatusListener
     
     @Override
     public void updateSystemStatus() {}
+    
+    @Override
+    public void sensorReset() {}
 }
