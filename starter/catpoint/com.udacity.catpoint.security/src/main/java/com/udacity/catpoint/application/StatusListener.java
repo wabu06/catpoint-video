@@ -19,4 +19,5 @@ public interface StatusListener
     void armingStatusChanged();
     void updateSystemStatus();
     void sensorReset();
+    void enableAddSensor(boolean enable);
 }

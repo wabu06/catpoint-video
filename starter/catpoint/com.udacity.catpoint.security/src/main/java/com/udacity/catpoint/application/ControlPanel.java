@@ -22,7 +22,7 @@ public class ControlPanel extends JPanel implements StatusListener
     private SecurityService securityService;
     private Map<ArmingStatus, JButton> buttonMap;
 	
-	SensorPanel sensors;
+	//SensorPanel sensors;
 
     public ControlPanel(SecurityService securityService)
 	{
@@ -108,4 +108,7 @@ public class ControlPanel extends JPanel implements StatusListener
     
     @Override
     public void sensorReset() {}
+    
+    @Override
+    public void enableAddSensor(boolean enable) {}
 }

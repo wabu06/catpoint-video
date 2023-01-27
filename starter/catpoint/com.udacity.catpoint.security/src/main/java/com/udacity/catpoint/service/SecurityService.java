@@ -78,6 +78,12 @@ public class SecurityService
     {
     	sensorServiceMap.forEach( (s, sfs) -> sfs.stopFeed() );
     	unSelectFeed(); pool.shutdown();
+    	
+    	getSensors().forEach( s -> s.setEnable(false) );
+    	
+    	statusListeners.forEach( sl -> sl.sensorReset() );
+    	
+    	statusListeners.forEach( sl -> sl.enableAddSensor(false) );
     }
     
     private void initSensorServiceMap()

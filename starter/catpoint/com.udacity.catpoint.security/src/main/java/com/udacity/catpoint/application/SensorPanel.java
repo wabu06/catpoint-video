@@ -75,7 +75,8 @@ public class SensorPanel extends JPanel implements StatusListener
     /**
      * Builds the panel with the form for adding a new sensor
      */
-    private JPanel buildAddSensorPanel() {
+    private JPanel buildAddSensorPanel()
+    {
         JPanel p = new JPanel();
         p.setLayout(new MigLayout());
         p.add(newSensorName);
@@ -133,6 +134,8 @@ public class SensorPanel extends JPanel implements StatusListener
 			JButton sensorToggleButton = new JButton((s.getActive() ? "Deactivate" : "Activate"));
             JButton sensorRemoveButton = new JButton("Remove Sensor");
             
+            sensorToggleButton.setEnabled(s.isEnabled());
+            
             if( s.hashCode() == securityService.getSelectedFeed() )
     			showFeedButton.setEnabled(false);
     		else
@@ -146,11 +149,11 @@ public class SensorPanel extends JPanel implements StatusListener
             p.add(sensorLabel, "span 1"); // p.add(sensorLabel, "width 100:100:100");
             p.add(showFeedButton, "span 1, wrap"); // p.add(showFeedButton, "width 100:100:100, wrap");
             	// p.add(alarmStatusLabel, "width 100:100:100");
-            p.add(alarmStatusLabel);
+            p.add(alarmStatusLabel, "gapx 0 0");
             	// p.add(sensorToggleButton, "width 100:100:100");
-            p.add(sensorToggleButton);
+            p.add(sensorToggleButton, "gapx 0 0");
             	// p.add(sensorRemoveButton, "width 100:100:100, wrap");
-            p.add(sensorRemoveButton, "wrap");
+            p.add(sensorRemoveButton, "left, wrap");
         });
 
         repaint();
@@ -191,7 +194,7 @@ public class SensorPanel extends JPanel implements StatusListener
         securityService.addSensor(sensor);
         updateSensorList(sensorListPanel);
         
-        if( securityService.getSensors().size() + 1 > 4)
+        if( securityService.getSensors().size() + 1 > 3)
         	addNewSensorButton.setEnabled(false);
     }
 
@@ -206,7 +209,7 @@ public class SensorPanel extends JPanel implements StatusListener
         
         if( !addNewSensorButton.isEnabled() )
         {
-        	if( securityService.getSensors().size() < 4 )
+        	if( securityService.getSensors().size() < 3 )
        			addNewSensorButton.setEnabled(true);
         }
     }
@@ -251,5 +254,8 @@ public class SensorPanel extends JPanel implements StatusListener
     	updateSensorList(sensorListPanel);
     }
     
-    public void enableAddSensor(boolean enable) {}
+    @Override
+    public void enableAddSensor(boolean enable) {
+		addNewSensorButton.setEnabled(enable);
+    }
 }

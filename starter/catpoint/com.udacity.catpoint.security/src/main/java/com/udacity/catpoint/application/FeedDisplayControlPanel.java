@@ -24,10 +24,8 @@ import java.util.stream.*;
 import org.opencv.core.Mat;
 
 
-/** Panel containing the 'camera' output. Allows users to 'refresh' the camera
- * by uploading their own picture, and 'scan' the picture, sending it for image analysis
- */
-public class FeedDisplayControlPanel extends JPanel implements StatusListener // FeedDisplayControlPanel
+		// General Application Controls
+public class FeedDisplayControlPanel extends JPanel implements StatusListener
 {
     private SecurityService securityService;
     
@@ -56,9 +54,7 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener //
         this.fdw = fdw;
 
 		panelHeader = new JLabel("APP Control"); panelHeader.setFont(StyleService.HEADING_FONT);
-        //cameraHeader = new JLabel("No Cats Detected As Yet");
-        //cameraHeader.setFont(StyleService.HEADING_FONT);
-        
+
         //camPanel = new JPanel(); camPanel.setLayout( new MigLayout() ); camPanel.add(cameraLabel, "span 3");
 
         this.showFeedButton = new JButton("Show/Hide Feed Display Window");
@@ -98,7 +94,7 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener //
         
         JButton stopFeeds = new JButton("Shutdown All Feeds");
         
-        stopFeeds.addActionListener( e -> securityService.stopAllFeeds() );
+        stopFeeds.addActionListener( e -> { securityService.stopAllFeeds(); stopFeeds.setEnabled(false); } );
 
 		add(panelHeader, "span 3, wrap");
 		//add(cameraHeader, "span 3, wrap");
@@ -132,4 +128,7 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener //
     
     @Override
     public void sensorReset() {}
+    
+    @Override
+    public void enableAddSensor(boolean enable) {}
 }

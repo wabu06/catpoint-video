@@ -2,6 +2,8 @@ package com.udacity.detection.service;
 
 
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.imgcodecs.Imgcodecs;
 
 import java.util.Objects;
 
@@ -17,8 +19,6 @@ import java.util.Random;
 //import javax.swing.JOptionPane;
 
 
-// int[] dataBuffInt = image.getRGB(0, 0, w, h, null, 0, w);
-
 /**
  * Service that tries to guess if an frame displays a cat.
  */
@@ -26,75 +26,84 @@ public class FakeDetectionService implements DetectionService
 {
     private Random rng;
     
-    private boolean detect;
-    
-    private int frameHash, start_count, period_count, start, period;
+    private int frameHash, frameX, periodX, frameCount, periodCount;
     
     private float confidence;
+    
+	private boolean detected;
 	
 	public FakeDetectionService(Random rng)
 	{
 		this.rng = rng;
 		
-		start = rng.nextInt(101);
-		period = rng.nextInt(16);
+		frameX = rng.nextInt(3000) + 1;
+		periodX = rng.nextInt(700) + 300;
 		
-		frameHash = start_count = period_count = 0;
-		
-		detect = false;
+		frameHash = frameCount = periodCount = 0;
 		
 		confidence = rng.nextFloat();
 		
+		detected = false;
+
 				//log.info( String.format("%s %.1f%% %s", "confidence:", confidence, "\n") );
-		log.info( String.format("%s %f %s %d %s %d", "confidence:", confidence, "*** start:", start, "*** period:", period) );
+		log.info( String.format("%s %f %s %d %s %d", "confidence:", confidence, "*** frameX:", frameX, "*** periodX:", periodX) );
 	}
 
     @Override
 	public boolean frameContainsCat(Mat frame, float threshold)
 	{	
-		threshold += 10.0;
+		threshold += 30.0;
+		
+		MatOfByte mob = new MatOfByte();
+		Imgcodecs.imencode(".jpg", frame, mob);
+		
+		//log.info( String.format("%s %d %s %d %s %d", "frameHash:", frameHash, "*** periodCount:", periodCount, "*** frameCount:", frameCount) );
 
-		/*if(frameHash <= 0)
+		//log.info( String.format("%s %d", "hashCode:", Objects.hashCode(mob) ));
+		
+		log.info( String.format("%s %d %s %d", "frameCount:", frameCount, "periodCount", periodCount) );
+
+		if(frameHash <= 0)
 		{
-			if(start_count > start)
+			if(frameCount < frameX)
 			{
-				frameHash = Objects.hashCode(frame);
+				frameCount++;
+				return false;
+			}
+			else
+			{
+				frameHash = Objects.hashCode(mob);
+				detected = true;
+				return true;
+			}
+		}
+		
+		if(frameHash > 0)
+		{
+			if( frameHash == Objects.hashCode(mob) )
+			{
+				periodCount = 0;
+				detected = true;
+				return true;
+			}
+		}
+		
+		if(detected)
+		{
+			if(periodCount < periodX)
+			{
+				periodCount++;
 				return true;
 			}
 			else
 			{
-				start_count++;
-				return false;
+				detected = false;
+				return true;
 			}
 		}
-		else
-		{
-			if(period_count < period)
-			{
-				period_count++;
-				
-				if(confidence < threshold)
-					return true;
-				else
-					return false;
-			}
-			else
-			{
-				if( frameHash == Objects.hashCode(frame) )
-				{
-					period_count = 0;
-					confidence = rng.nextFloat();
-					
-					if(confidence < threshold)
-						return true;
-					else
-						return false;
-				}
-				else
-					return false;
-			}
-		}*/
 		
-		return rng.nextFloat() < threshold;
+		return false;
+
+		//return rng.nextFloat() < threshold;
 	}
 }

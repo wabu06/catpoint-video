@@ -62,7 +62,7 @@ public class CatpointGui extends JFrame
 		//setLocation(50, 50);
         //setSize(600, 850);
         
-		setSize(390, 720);
+		setSize(390, 740);
         setTitle("NoCats");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
