@@ -18,6 +18,6 @@ public interface StatusListener
     void showFeed(Mat frame, int sensorHash);
     void armingStatusChanged();
     void updateSystemStatus();
-    void sensorReset();
+    void updateSensors();
     void enableAddSensor(boolean enable);
 }

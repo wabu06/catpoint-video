@@ -114,6 +114,9 @@ public class SensorPanel extends JPanel implements StatusListener
 		
         securityService.getSensors().stream().sorted().forEach(s ->
 		{
+            JPanel sensorPanel = new JPanel();
+            sensorPanel.setLayout(new MigLayout());
+            
             JLabel sensorLabel = new JLabel
 			(
 				String.format("%s(%s): %s", s.getName(),
@@ -144,16 +147,28 @@ public class SensorPanel extends JPanel implements StatusListener
             showFeedButton.addActionListener( e -> updateFeedSelection(e, s) );
             sensorToggleButton.addActionListener(e -> setSensorActivity(s, !s.getActive()) );
             sensorRemoveButton.addActionListener(e -> removeSensor(s));
+            
+            //p.add(sensorLabel, "width 300:300:300");
+            sensorPanel.add(sensorLabel, "span 1"); // p.add(sensorLabel, "width 100:100:100");
+            sensorPanel.add(showFeedButton, "span 1, wrap"); // p.add(showFeedButton, "width 100:100:100, wrap");
+            	// p.add(alarmStatusLabel, "width 100:100:100");
+            sensorPanel.add(alarmStatusLabel, "span 0");
+            	// p.add(sensorToggleButton, "width 100:100:100");
+            sensorPanel.add(sensorToggleButton, "span 0");
+            	// p.add(sensorRemoveButton, "width 100:100:100, wrap");
+            sensorPanel.add(sensorRemoveButton, "span 1");
 
 	            //p.add(sensorLabel, "width 300:300:300");
-            p.add(sensorLabel, "span 1"); // p.add(sensorLabel, "width 100:100:100");
-            p.add(showFeedButton, "span 1, wrap"); // p.add(showFeedButton, "width 100:100:100, wrap");
+            //p.add(sensorLabel, "span 1"); // p.add(sensorLabel, "width 100:100:100");
+            //p.add(showFeedButton, "span 1, wrap"); // p.add(showFeedButton, "width 100:100:100, wrap");
             	// p.add(alarmStatusLabel, "width 100:100:100");
-            p.add(alarmStatusLabel, "gapx 0 0");
+            //p.add(alarmStatusLabel, "gapx 0 0");
             	// p.add(sensorToggleButton, "width 100:100:100");
-            p.add(sensorToggleButton, "gapx 0 0");
+           //p.add(sensorToggleButton, "gapx 0 0");
             	// p.add(sensorRemoveButton, "width 100:100:100, wrap");
-            p.add(sensorRemoveButton, "left, wrap");
+            //p.add(sensorRemoveButton, "left, wrap");
+            
+            p.add(sensorPanel, "wrap");
         });
 
         repaint();
@@ -209,6 +224,9 @@ public class SensorPanel extends JPanel implements StatusListener
         
         if( !addNewSensorButton.isEnabled() )
         {
+        	if( securityService.getPool().isShutdown() )
+        		return;
+
         	if( securityService.getSensors().size() < 3 )
        			addNewSensorButton.setEnabled(true);
         }
@@ -250,12 +268,19 @@ public class SensorPanel extends JPanel implements StatusListener
     public void updateSystemStatus() {}
     
     @Override
-    public void sensorReset() {
+    public void updateSensors() {
     	updateSensorList(sensorListPanel);
     }
     
     @Override
-    public void enableAddSensor(boolean enable) {
-		addNewSensorButton.setEnabled(enable);
+    public void enableAddSensor(boolean enable)
+    {
+		if(enable)
+		{
+			if( securityService.getSensors().size() < 3 )
+       			addNewSensorButton.setEnabled(enable);
+		}
+		else
+			addNewSensorButton.setEnabled(enable);
     }
 }

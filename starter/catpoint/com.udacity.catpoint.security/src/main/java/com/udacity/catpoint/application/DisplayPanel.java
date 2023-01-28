@@ -89,7 +89,7 @@ public class DisplayPanel extends JPanel implements StatusListener {
     }
     
     @Override
-    public void sensorReset() {}
+    public void updateSensors() {}
     
     @Override
     public void enableAddSensor(boolean enable) {}

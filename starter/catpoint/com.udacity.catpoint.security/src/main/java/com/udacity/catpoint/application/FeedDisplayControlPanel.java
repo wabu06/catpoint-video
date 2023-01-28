@@ -92,9 +92,21 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener
         										securityService.setState("NO");
         								});
         
-        JButton stopFeeds = new JButton("Shutdown All Feeds");
+        JButton stopFeeds = new JButton("Disable Feeds");
         
-        stopFeeds.addActionListener( e -> { securityService.stopAllFeeds(); stopFeeds.setEnabled(false); } );
+        stopFeeds.addActionListener( e -> {
+        									if( securityService.getPool().isShutdown() )
+        									{
+        										stopFeeds.setText("Disable Feeds");
+        										securityService.startFeeds();
+        									}
+        									else
+        									{
+        										stopFeeds.setText("Enable Feeds");
+        										securityService.stopFeeds();
+        									}
+        									//stopFeeds.setEnabled(false);
+        								});
 
 		add(panelHeader, "span 3, wrap");
 		//add(cameraHeader, "span 3, wrap");
@@ -127,7 +139,7 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener
     public void showFeed(Mat frame, int sensorHash) {}
     
     @Override
-    public void sensorReset() {}
+    public void updateSensors() {}
     
     @Override
     public void enableAddSensor(boolean enable) {}

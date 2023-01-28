@@ -121,7 +121,7 @@ public class FeedDisplayWindow implements StatusListener
     public void armingStatusChanged() {}
     
     @Override
-    public void sensorReset() {}
+    public void updateSensors() {}
     
 	@Override
     public void enableAddSensor(boolean enable) {}

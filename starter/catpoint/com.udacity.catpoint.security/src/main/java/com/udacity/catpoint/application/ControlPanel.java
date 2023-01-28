@@ -107,7 +107,7 @@ public class ControlPanel extends JPanel implements StatusListener
     public void updateSystemStatus() {}
     
     @Override
-    public void sensorReset() {}
+    public void updateSensors() {}
     
     @Override
     public void enableAddSensor(boolean enable) {}

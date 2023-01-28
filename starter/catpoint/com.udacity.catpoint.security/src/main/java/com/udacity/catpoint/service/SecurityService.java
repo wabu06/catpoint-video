@@ -74,16 +74,30 @@ public class SecurityService
     	return i + 1;
     }
     
-    public void stopAllFeeds()
+    public void stopFeeds()
     {
     	sensorServiceMap.forEach( (s, sfs) -> sfs.stopFeed() );
     	unSelectFeed(); pool.shutdown();
     	
     	getSensors().forEach( s -> s.setEnable(false) );
     	
-    	statusListeners.forEach( sl -> sl.sensorReset() );
-    	
+    	statusListeners.forEach( sl -> sl.updateSensors() );
     	statusListeners.forEach( sl -> sl.enableAddSensor(false) );
+    }
+    
+    public void startFeeds()
+    {
+    	pool = Executors.newFixedThreadPool​(4);
+    	
+    	sensorServiceMap.forEach( (s, sfs) -> {
+    											sfs.startFeed();
+    											pool.submit( () -> sfs.getAndAnalyzeFeed() );
+    										});
+    	
+    	getSensors().forEach( s -> s.setEnable(true) );
+    	
+    	statusListeners.forEach( sl -> sl.updateSensors() );
+    	statusListeners.forEach( sl -> sl.enableAddSensor(true) );
     }
     
     private void initSensorServiceMap()
@@ -121,7 +135,7 @@ public class SecurityService
 			sensorServiceMap.forEach( (s, sfs) -> sfs.setSensorAlarmStatus(AlarmStatus.NO_ALARM) );
 			getSensors().forEach( s -> s.setActive(Boolean.FALSE) );
 			
-			statusListeners.forEach( sl -> sl.sensorReset() );
+			statusListeners.forEach( sl -> sl.updateSensors() );
 			//statusListeners.forEach( sl -> sl.sensorStatusChanged() );
 		}
 
