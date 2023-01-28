@@ -41,9 +41,10 @@ public class FeedDisplayWindow implements StatusListener
 		displayLabel.setSize( new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT) );
 		displayLabel.setBackground(Color.WHITE);
 		
-		try
+		try( InputStream is = getClass().getClassLoader().getResourceAsStream("color-bars.png") )
 		{
-			BufferedImage buffImg = ImageIO.read( new File("cameraFeeds/color-bar.png") );
+				//BufferedImage buffImg = ImageIO.read( new File("cameraFeeds/color-bar.png") );
+			BufferedImage buffImg = ImageIO.read(is);
 			
 			Image tmp = new ImageIcon(buffImg).getImage();
 		

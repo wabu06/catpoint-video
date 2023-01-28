@@ -67,7 +67,7 @@ public class SensorPanel extends JPanel implements StatusListener
 
         updateSensorList(sensorListPanel);
 
-        add(panelLabel, "wrap");
+        add(panelLabel, "wrap push");
         add(newSensorPanel, "span");
         add(sensorListPanel, "span");
     }
@@ -82,12 +82,12 @@ public class SensorPanel extends JPanel implements StatusListener
         p.add(newSensorName);
         p.add(newSensorNameField, "width 50:100:200");
         p.add(newSensorType);
-        p.add(newSensorTypeDropdown, "wrap");
-        p.add(addNewSensorButton, "span 3, wrap");
+        p.add(newSensorTypeDropdown, "wrap push");
+        p.add(addNewSensorButton, "span 3, wrap push");
         
         JLabel sensorLabel = new JLabel("Sensors:");
         sensorLabel.setFont(StyleService.SUB_HEADING_FONT);
-        p.add(sensorLabel);
+        //p.add(sensorLabel);
         
         return p;
     }
@@ -150,13 +150,13 @@ public class SensorPanel extends JPanel implements StatusListener
             
             //p.add(sensorLabel, "width 300:300:300");
             sensorPanel.add(sensorLabel, "span 1"); // p.add(sensorLabel, "width 100:100:100");
-            sensorPanel.add(showFeedButton, "span 1, wrap"); // p.add(showFeedButton, "width 100:100:100, wrap");
+            sensorPanel.add(showFeedButton, "span 1, wrap push"); // p.add(showFeedButton, "width 100:100:100, wrap");
             	// p.add(alarmStatusLabel, "width 100:100:100");
             sensorPanel.add(alarmStatusLabel, "span 0");
             	// p.add(sensorToggleButton, "width 100:100:100");
-            sensorPanel.add(sensorToggleButton, "span 0");
+            sensorPanel.add(sensorToggleButton, "split 2");
             	// p.add(sensorRemoveButton, "width 100:100:100, wrap");
-            sensorPanel.add(sensorRemoveButton, "span 1");
+            sensorPanel.add(sensorRemoveButton);
 
 	            //p.add(sensorLabel, "width 300:300:300");
             //p.add(sensorLabel, "span 1"); // p.add(sensorLabel, "width 100:100:100");
@@ -168,7 +168,8 @@ public class SensorPanel extends JPanel implements StatusListener
             	// p.add(sensorRemoveButton, "width 100:100:100, wrap");
             //p.add(sensorRemoveButton, "left, wrap");
             
-            p.add(sensorPanel, "wrap");
+            sensorPanel.setBorder( BorderFactory.createRaisedBevelBorder() );
+            p.add(sensorPanel, "wrap push");
         });
 
         repaint();

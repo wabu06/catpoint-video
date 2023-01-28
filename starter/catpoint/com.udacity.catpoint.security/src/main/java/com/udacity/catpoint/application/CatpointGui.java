@@ -44,6 +44,8 @@ public class CatpointGui extends JFrame
     //private ImagePanel imagePanel = new ImagePanel(securityService);
 
 	private FeedDisplayWindow fdw;
+	
+	private JFrame sensorPanelWindow;
 
     public CatpointGui()
 	{
@@ -58,7 +60,7 @@ public class CatpointGui extends JFrame
 		this.feedDisplayControlPanel = new FeedDisplayControlPanel(securityService, fdw);
 		this.controlPanel = new ControlPanel(securityService);
 	
-        //setLocation(100, 100);
+        setLocation(995, 0);
 		//setLocation(50, 50);
         //setSize(600, 850);
         
@@ -82,9 +84,13 @@ public class CatpointGui extends JFrame
         mainPanel.add(displayPanel, "wrap");
         mainPanel.add(feedDisplayControlPanel, "wrap");
         mainPanel.add(controlPanel, "wrap");
+        //mainPanel.add(controlPanel);
         mainPanel.add(sensorPanel);
 
         getContentPane().add(mainPanel);
+        
+        //sensorPanelWindow = new JFrame("Sensor Panel");
+        //sensorPanelWindow.getContentPane().add(sensorPanel);
     }
     
     public JFrame getFeedDisplay() {
