@@ -20,4 +20,6 @@ public interface StatusListener
     void updateSystemStatus();
     void updateSensors();
     void enableAddSensor(boolean enable);
+    void setFeedDisplayTitle(Sensor sensor);
+    void setFeedDisplayTitle();
 }

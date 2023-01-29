@@ -42,6 +42,8 @@ public class SensorPanel extends JPanel implements StatusListener
     private JPanel sensorListPanel;
     private JPanel newSensorPanel;
     
+    private JLabel detectMsg;
+    
     private Map<Sensor, JLabel> labelMap;
 
     public SensorPanel(SecurityService securityService)
@@ -64,11 +66,20 @@ public class SensorPanel extends JPanel implements StatusListener
         newSensorPanel = buildAddSensorPanel();
         sensorListPanel = new JPanel();
         sensorListPanel.setLayout(new MigLayout());
+        
+        detectMsg = new JLabel("No Cats Detected As Yet");
+        detectMsg.setFont(StyleService.SUB_HEADING_FONT);
+        
+        JPanel msgPanel = new JPanel();
+        msgPanel.setLayout(new MigLayout());
+        msgPanel.add(detectMsg);
+        msgPanel.setBorder( BorderFactory.createEtchedBorder() );
 
         updateSensorList(sensorListPanel);
 
         add(panelLabel, "wrap push");
-        add(newSensorPanel, "span");
+        add(newSensorPanel, "span, wrap push");
+        add(msgPanel, "wrap push");
         add(sensorListPanel, "span");
     }
 
@@ -78,24 +89,21 @@ public class SensorPanel extends JPanel implements StatusListener
     private JPanel buildAddSensorPanel()
     {
         JPanel p = new JPanel();
+        
         p.setLayout(new MigLayout());
-        p.add(newSensorName);
+        p.add(newSensorName, "split 3");
         p.add(newSensorNameField, "width 50:100:200");
         p.add(newSensorType);
         p.add(newSensorTypeDropdown, "wrap push");
-        p.add(addNewSensorButton, "span 3, wrap push");
-        
-        JLabel sensorLabel = new JLabel("Sensors:");
-        sensorLabel.setFont(StyleService.SUB_HEADING_FONT);
-        //p.add(sensorLabel);
-        
+        p.add(addNewSensorButton, "span 3");
+
         return p;
     }
     
     private void updateFeedSelection(ActionEvent event, Sensor sensor)
     {
     	securityService.selectFeed(sensor);
-    	
+    	securityService.getStatusListeners().forEach( sl -> sl.setFeedDisplayTitle(sensor) );
     	updateSensorList(sensorListPanel);
     }
 
@@ -239,7 +247,13 @@ public class SensorPanel extends JPanel implements StatusListener
     public void notify(AlarmStatus status) {} // no behavior necessary
 
     @Override
-    public void catDetected(boolean catDetected, Sensor sensor) {} // no behavior necessary
+    public void catDetected(boolean cat, Sensor sensor)
+    {
+    	if(cat)
+        	detectMsg.setText( "DANGER - CAT DETECTED" + Character.toString(0x1F63C) + sensor.getSensorType().toString() );
+        else
+            detectMsg.setText("No Cats Detected");
+    }
 
     /*@Override
     public void sensorStatusChanged() {
@@ -284,4 +298,10 @@ public class SensorPanel extends JPanel implements StatusListener
 		else
 			addNewSensorButton.setEnabled(enable);
     }
+    
+    @Override
+    public void setFeedDisplayTitle(Sensor sensor) {}
+    
+    @Override
+    public void setFeedDisplayTitle() {}
 }

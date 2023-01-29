@@ -60,7 +60,7 @@ public class CatpointGui extends JFrame
 		this.feedDisplayControlPanel = new FeedDisplayControlPanel(securityService, fdw);
 		this.controlPanel = new ControlPanel(securityService);
 	
-        setLocation(995, 0);
+        setLocation(975, 0);
 		//setLocation(50, 50);
         //setSize(600, 850);
         

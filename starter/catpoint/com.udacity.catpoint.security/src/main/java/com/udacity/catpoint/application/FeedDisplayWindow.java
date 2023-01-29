@@ -128,6 +128,16 @@ public class FeedDisplayWindow implements StatusListener
     public void enableAddSensor(boolean enable) {}
     
     @Override
+    public void setFeedDisplayTitle(Sensor sensor) {
+    	displayFrame.setTitle(sensor.getSensorType().toString() + " Sensor Feed");
+    }
+    
+    @Override
+    public void setFeedDisplayTitle() {
+    	displayFrame.setTitle("Feed Display");
+    }
+    
+    @Override
     public void showFeed(Mat frame, int sensorHash)
 	{
 		//Imgproc.putText(frame, elapse.toString(), new Point(10, 50), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 255, 255), 2);

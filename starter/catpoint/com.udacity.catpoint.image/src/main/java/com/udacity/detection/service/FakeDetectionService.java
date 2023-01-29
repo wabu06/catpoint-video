@@ -36,8 +36,8 @@ public class FakeDetectionService implements DetectionService
 	{
 		this.rng = rng;
 		
-		frameX = rng.nextInt(3000) + 1;
-		periodX = rng.nextInt(700) + 300;
+		frameX = rng.nextInt(1900) + 1;
+		periodX = rng.nextInt(401) + 250;
 		
 		frameHash = frameCount = periodCount = 0;
 		
@@ -52,7 +52,7 @@ public class FakeDetectionService implements DetectionService
     @Override
 	public boolean frameContainsCat(Mat frame, float threshold)
 	{	
-		threshold += 30.0;
+		threshold -= 30.0;
 		
 		MatOfByte mob = new MatOfByte();
 		Imgcodecs.imencode(".jpg", frame, mob);

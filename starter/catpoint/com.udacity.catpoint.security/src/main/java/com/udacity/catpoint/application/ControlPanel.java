@@ -111,4 +111,10 @@ public class ControlPanel extends JPanel implements StatusListener
     
     @Override
     public void enableAddSensor(boolean enable) {}
+    
+    @Override
+    public void setFeedDisplayTitle(Sensor sensor) {}
+    
+    @Override
+    public void setFeedDisplayTitle() {}
 }

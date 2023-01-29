@@ -17,7 +17,7 @@ public class DisplayPanel extends JPanel implements StatusListener {
 
     private JLabel currentStatusLabel;
     
-    private JLabel detectMsg;
+    //private JLabel detectMsg;
     
     private SecurityService securityService;
 
@@ -40,12 +40,12 @@ public class DisplayPanel extends JPanel implements StatusListener {
         
         updateSystemStatus();
         
-        detectMsg = new JLabel("No Cats Detected As Yet");
+        //detectMsg = new JLabel("No Cats Detected As Yet");
 
         add(panelLabel, "span 2, wrap");
         add(systemStatusLabel);
         add(currentStatusLabel, "wrap");
-        add(detectMsg, "span 3, wrap");
+        //add(detectMsg, "span 3, wrap");
 
     }
 
@@ -60,10 +60,10 @@ public class DisplayPanel extends JPanel implements StatusListener {
     @Override
     public void catDetected(boolean cat, Sensor sensor)
     {
-    	if(cat)
+    	/*if(cat)
         	detectMsg.setText( "DANGER - CAT DETECTED" + Character.toString(0x1F63C) + sensor.getSensorType().toString() );
         else
-            detectMsg.setText("No Cats Detected");
+            detectMsg.setText("No Cats Detected");*/
     }
 
     @Override
@@ -93,4 +93,10 @@ public class DisplayPanel extends JPanel implements StatusListener {
     
     @Override
     public void enableAddSensor(boolean enable) {}
+    
+    @Override
+    public void setFeedDisplayTitle(Sensor sensor) {}
+    
+    @Override
+    public void setFeedDisplayTitle() {}
 }

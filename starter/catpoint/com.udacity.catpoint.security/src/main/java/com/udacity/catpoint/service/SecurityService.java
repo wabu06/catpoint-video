@@ -206,7 +206,10 @@ public class SecurityService
     public void removeSensor(Sensor sensor)
     {
         if( sensor.hashCode() == getSelectedFeed() )
+        {
         	unSelectFeed();
+        	statusListeners.forEach( sl -> sl.setFeedDisplayTitle() );
+        }
 
         SensorFeedService sfs = sensorServiceMap.remove(sensor);
         sfs.stopFeed();
