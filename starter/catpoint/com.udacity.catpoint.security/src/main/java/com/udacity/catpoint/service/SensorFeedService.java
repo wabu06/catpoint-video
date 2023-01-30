@@ -80,7 +80,7 @@ public class SensorFeedService
 		if( !capture.open(feedSource) )
 		{
 			// System.out.println("Unable to open video file!");
-			JOptionPane.showMessageDialog(null, "Unable To Connect TO Feed Source!", "ERROR", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Unable To Connect To Video Feed!", "ERROR", JOptionPane.ERROR_MESSAGE);
 			feed = false;
 			show = false;
 			//System.exit(0);

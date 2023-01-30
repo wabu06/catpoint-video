@@ -67,7 +67,7 @@ public class SensorPanel extends JPanel implements StatusListener
         sensorListPanel = new JPanel();
         sensorListPanel.setLayout(new MigLayout());
         
-        detectMsg = new JLabel("No Cats Detected As Yet");
+        detectMsg = new JLabel("Add Sensors For Cat Detection");
         detectMsg.setFont(StyleService.SUB_HEADING_FONT);
         
         JPanel msgPanel = new JPanel();
@@ -215,6 +215,11 @@ public class SensorPanel extends JPanel implements StatusListener
     
     private void addSensor(Sensor sensor)
     {
+        int size = securityService.getSensors().size();
+        
+        if(size == 0)
+        	detectMsg.setText("No Cats Detected As Yet");
+        
         securityService.addSensor(sensor);
         updateSensorList(sensorListPanel);
         
@@ -231,12 +236,17 @@ public class SensorPanel extends JPanel implements StatusListener
         securityService.removeSensor(sensor);
         updateSensorList(sensorListPanel);
         
+        int size = securityService.getSensors().size();
+        
+        if(size == 0)
+        	detectMsg.setText("Add Sensors For Cat Detection");
+
         if( !addNewSensorButton.isEnabled() )
         {
         	if( securityService.getPool().isShutdown() )
         		return;
 
-        	if( securityService.getSensors().size() < 3 )
+        	if(size < 3)
        			addNewSensorButton.setEnabled(true);
         }
     }
