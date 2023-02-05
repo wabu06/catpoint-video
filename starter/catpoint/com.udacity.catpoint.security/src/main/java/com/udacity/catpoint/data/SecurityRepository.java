@@ -22,4 +22,5 @@ public interface SecurityRepository
 	String getState();
 	void setDetectionService(String ds);
 	String getDetectionService();
+	Sensor getCurrentSenorFeed();
 }

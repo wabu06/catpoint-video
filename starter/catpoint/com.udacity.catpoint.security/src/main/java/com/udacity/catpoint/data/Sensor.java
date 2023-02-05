@@ -16,7 +16,7 @@ public class Sensor implements Comparable<Sensor>
     private UUID sensorId;
     private String name;
     private Boolean active;
-    private boolean enable;
+    //private boolean enable;
     private SensorType sensorType;
 
     public Sensor(String name, SensorType sensorType)
@@ -25,7 +25,7 @@ public class Sensor implements Comparable<Sensor>
         this.sensorType = sensorType;
         this.sensorId = UUID.randomUUID();
         this.active = Boolean.FALSE;
-        this.enable = true;
+        //this.enable = true;
     }
 
     @Override
@@ -50,13 +50,13 @@ public class Sensor implements Comparable<Sensor>
         this.name = name;
     }
     
-    public void setEnable(boolean e) {
+    /* public void setEnable(boolean e) {
     	this.enable = e;
     }
     
     public boolean isEnabled() {
     	return this.enable;
-    }
+    }*/
 
     public Boolean getActive() {
         return active;

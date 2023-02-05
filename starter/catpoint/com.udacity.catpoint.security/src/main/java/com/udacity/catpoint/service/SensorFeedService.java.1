@@ -34,6 +34,7 @@ import javax.swing.JButton;
 		// SensorService sfs = new SensorService(new SecurityRepository(), new Sensor(name, type) )
 public class SensorFeedService
 {
+	//private SecurityRepository securityRepository;
 	private SecurityService securityService;
 	
 	private Sensor sensor;
@@ -49,12 +50,16 @@ public class SensorFeedService
 
 	private DetectionService detectionService;
 	
+	//private FeedDisplayWindow fdw = FeedDisplayWindow.getInstance();
+	
 	private String feedSource;
 	
 	private VideoCapture capture;
-
+	
+	//public SensorService(SecurityRepository sr, SecurityService ss, Sensor sensor, String feedSource)
 	public SensorFeedService(SecurityService ss, Sensor sensor)
 	{
+		//this.securityRepository = sr;
 		this.securityService = ss;
 
 		this.sensor = sensor;
@@ -80,12 +85,11 @@ public class SensorFeedService
 
 		if( !capture.open(feedSource) )
 		{
-			showFeedButton.setText("Unable To Connect To Feed Source");
-			showFeedButton.setEnabled(false);
-			sensorToggleButton.setEnabled(false);
-
+			// System.out.println("Unable to open video file!");
+			JOptionPane.showMessageDialog(null, "Unable To Connect To Video Feed!", "ERROR", JOptionPane.ERROR_MESSAGE);
 			feed = false;
 			show = false;
+			//System.exit(0);
 		}
 	}
 	
@@ -210,25 +214,31 @@ public class SensorFeedService
 		Mat frame = new Mat();
 
 		while(feed)
-		{	
+		{
+			//Long start = Instant.now().getEpochSecond();
+			
 			if( !capture.read(frame) )
 			{
 				capture.release();
 					
 				if( !capture.open(feedSource) )
 				{
-					showFeedButton.setText("Feed Source Connection Lost");
-					showFeedButton.setEnabled(false);
-					sensorToggleButton.setEnabled(false);
-
+					//System.out.println("Unable to open video file!");
+					JOptionPane.showMessageDialog(null, "Feed Source Connection Lost!", "ERROR", JOptionPane.ERROR_MESSAGE);
 					feed = false;
 					show = false;
+					//System.exit(0);
 				}
 					
 				continue;
 			}
-
+			
+			//elapse += Instant.now().getEpochSecond() - start;
+			
 			processFrame(frame);
+
+				// show currently selected feed
+			//if( sensor.equals( ss.getSelectedFeed().getSensor() ))
 			
 			securityService.getStatusListeners().forEach( sl -> sl.showFeed(frame, sensorHash) );
 		}

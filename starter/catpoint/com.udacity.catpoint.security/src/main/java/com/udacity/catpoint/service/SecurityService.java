@@ -76,12 +76,20 @@ public class SecurityService
     
     public void stopFeeds()
     {
-    	sensorServiceMap.forEach( (s, sfs) -> sfs.stopFeed() );
+    	sensorServiceMap.forEach( (s, sfs) -> {
+    											sfs.stopFeed();
+    											sfs.getSensorToggleButton().setEnabled(false);
+												sfs.getShowFeedButton().setEnabled(false);
+    										});
     	unSelectFeed(); pool.shutdown();
     	
-    	getSensors().forEach( s -> s.setEnable(false) );
+    	/*getSensors().forEach( (s) -> {
+										SensorFeedService sfs = sensorServiceMap.get(s);
+										sfs.getSensorToggleButton().setEnable(false);
+										sfs.getShowFeedButton().setEnable(false);
+									});*/
     	
-    	statusListeners.forEach( sl -> sl.updateSensors() );
+    	// statusListeners.forEach( sl -> sl.updateSensors() );
     	statusListeners.forEach( sl -> sl.enableAddSensor(false) );
     }
     
@@ -90,13 +98,21 @@ public class SecurityService
     	pool = Executors.newFixedThreadPool​(4);
     	
     	sensorServiceMap.forEach( (s, sfs) -> {
+    											sfs.getSensorToggleButton().setEnabled(true);
+												
+												/*if( s.hashCode() == getSelectedFeed() )
+    												sfs.getShowFeedButton.setEnabled(false);
+    											else*/
+    											
+    											sfs.getShowFeedButton().setEnabled(true);
+												
     											sfs.startFeed();
     											pool.submit( () -> sfs.getAndAnalyzeFeed() );
     										});
     	
-    	getSensors().forEach( s -> s.setEnable(true) );
+    	// getSensors().forEach( s -> s.setEnable(true) );
     	
-    	statusListeners.forEach( sl -> sl.updateSensors() );
+    	// statusListeners.forEach( sl -> sl.updateSensors() );
     	statusListeners.forEach( sl -> sl.enableAddSensor(true) );
     }
     
@@ -170,6 +186,10 @@ public class SecurityService
     
     public int unSelectFeed() {
     	return securityRepository.unSelectFeed();
+    }
+    
+    public Sensor getCurrentSenorFeed() {
+    	return securityRepository.getCurrentSenorFeed();
     }
 
     /**

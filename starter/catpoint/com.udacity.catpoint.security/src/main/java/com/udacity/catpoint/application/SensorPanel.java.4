@@ -102,17 +102,11 @@ public class SensorPanel extends JPanel implements StatusListener
     
     private void updateFeedSelection(ActionEvent event, Sensor sensor)
     {
-    	Sensor curfeed = securityService.getCurrentSenorFeed();
+    	int feed = securityService.getSelectedFeed();
     	
     	securityService.selectFeed(sensor);
     	securityService.getStatusListeners().forEach( sl -> sl.setFeedDisplayTitle(sensor) );
-    	
-    	securityService.getSensorFeeds().get(sensor).getShowFeedButton().setEnabled(false);
-    	
-    	if(curfeed != null)
-    		securityService.getSensorFeeds().get(curfeed).getShowFeedButton().setEnabled(true);
-    	
-    	//updateSensorList(sensorListPanel);
+    	updateSensorList(sensorListPanel);
     }
 
     /**
@@ -124,7 +118,7 @@ public class SensorPanel extends JPanel implements StatusListener
 	{
         p.removeAll();
         
-        //labelMap.clear();
+        labelMap.clear();
         
         //ExecutorService pool = securityService.getPool();
 		
@@ -147,34 +141,22 @@ public class SensorPanel extends JPanel implements StatusListener
         	alarmStatusLabel.setBackground(status.getColor());
         	alarmStatusLabel.setOpaque(true);
         	
-        	//labelMap.put(s, alarmStatusLabel);
+        	labelMap.put(s, alarmStatusLabel);
             
             JButton showFeedButton = new JButton( String.format("%s %s %s", "Show", s.getSensorType().toString(), "Sensor Feed") );
 			JButton sensorToggleButton = new JButton((s.getActive() ? "Deactivate" : "Activate"));
             JButton sensorRemoveButton = new JButton("Remove Sensor");
             
-            //sensorToggleButton.setEnabled(s.isEnabled());
+            sensorToggleButton.setEnabled(s.isEnabled());
             
-            if( !securityService.getSensorFeeds().get(s).getFeed() )
-            	sensorToggleButton.setEnabled(false);
-            
-            if( securityService.getPool().isShutdown() )
-            	showFeedButton.setEnabled(false);
-            else
-            {
-            	if( s.hashCode() == securityService.getSelectedFeed() )
-    				showFeedButton.setEnabled(false);
-    			else
-    				showFeedButton.setEnabled(true);
-    		}
+            if( s.hashCode() == securityService.getSelectedFeed() )
+    			showFeedButton.setEnabled(false);
+    		else
+    			showFeedButton.setEnabled(true);
 
             showFeedButton.addActionListener( e -> updateFeedSelection(e, s) );
             sensorToggleButton.addActionListener(e -> setSensorActivity(s, !s.getActive()) );
             sensorRemoveButton.addActionListener(e -> removeSensor(s));
-            
-            securityService.getSensorFeeds().get(s).setSensorLabel(sensorLabel).setShowFeedButton(showFeedButton)
-            									   .setAlarmStatusLabel(alarmStatusLabel).setSensorToggleButton(sensorToggleButton)
-            									   .setSensorRemoveButton(sensorRemoveButton);
             
             //p.add(sensorLabel, "width 300:300:300");
             sensorPanel.add(sensorLabel, "span 1"); // p.add(sensorLabel, "width 100:100:100");

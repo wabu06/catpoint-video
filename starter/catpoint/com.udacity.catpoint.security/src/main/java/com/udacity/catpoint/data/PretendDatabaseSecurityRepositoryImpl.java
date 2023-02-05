@@ -24,6 +24,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     private String detectionService, restore;
     
     private int sensorHash; // feed of sensor that is to be displayed
+    private Sensor curfeed; // sensor who's feed is currently being displayed
 
     	//preference keys
     private static final String SENSORS = "SENSORS";
@@ -77,6 +78,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
         }
         
         sensorHash = -1;
+        curfeed = null;
     }
 
     @Override
@@ -103,6 +105,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     @Override
     public int selectFeed(Sensor sensor) {
     	sensorHash = sensor.hashCode();
+    	curfeed = sensor;
     	return sensorHash;
     }
     
@@ -111,12 +114,18 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     {
     	int hash = sensorHash;
     	sensorHash = -1;
+    	curfeed = null;
     	return hash;
     }
     
     @Override
     public int getSelectedFeed() {
     	return sensorHash;
+    }
+    
+    @Override
+    public Sensor getCurrentSenorFeed() {
+    	return curfeed;
     }
 
     @Override
