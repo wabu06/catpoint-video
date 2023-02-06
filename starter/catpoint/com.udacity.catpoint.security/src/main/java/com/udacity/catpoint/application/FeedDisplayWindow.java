@@ -138,6 +138,15 @@ public class FeedDisplayWindow implements StatusListener
     }
     
     @Override
+    public void showOrHideFeedDisplay()
+    {
+    	if( displayFrame.isVisible() )
+    		displayFrame.setVisible(false);
+    	else
+    		displayFrame.setVisible(true);
+    }
+    
+    @Override
     public void showFeed(Mat frame, int sensorHash)
 	{
 		//Imgproc.putText(frame, elapse.toString(), new Point(10, 50), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 255, 255), 2);

@@ -23,77 +23,104 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This is the primary JFrame for the application that contains all the top-level JPanels.
- *
- * We're not using any dependency injection framework, so this class also handles constructing
- * all our dependencies and providing them to other classes as necessary.
- */
-public class CatpointGui extends JFrame
+ * Here we setup the JFrame that contains the controls for the application,
+ * as well as the JFrame for displaying the currently selected sensor feed.
+**/
+public class CatpointGui
 {
-    private SecurityRepository securityRepository;
-	
+	private SecurityRepository securityRepository;
 	private SecurityService securityService;
-	
-    private DisplayPanel displayPanel;
-    private SensorPanel sensorPanel;
-	
-	//private ImagePanel imagePanel;
-	private FeedDisplayControlPanel feedDisplayControlPanel;
-	private ControlPanel controlPanel;
-    
-    //private ImagePanel imagePanel = new ImagePanel(securityService);
 
+	private static CatpointGui cpg = null;
+	
+	private CatpointController controller;
 	private FeedDisplayWindow fdw;
 	
-	private JFrame sensorPanelWindow;
-
-    public CatpointGui()
+	private CatpointGui()
 	{
 		this.securityRepository = new PretendDatabaseSecurityRepositoryImpl();
-		
 		this.securityService = new SecurityService(securityRepository);
 		
-		this.fdw = FeedDisplayWindow.getInstance(securityService); //.getDisplayFrame().setVisible(true);
+		this.controller = new CatpointController(securityService);
 		
-		this.displayPanel = new DisplayPanel(securityService);
-    	this.sensorPanel = new SensorPanel(securityService);
-		this.feedDisplayControlPanel = new FeedDisplayControlPanel(securityService, fdw);
-		this.controlPanel = new ControlPanel(securityService);
+		this.fdw = FeedDisplayWindow.getInstance(securityService);
+		
+		this.controller.setVisible(true);
+		this.fdw.getDisplayFrame().setVisible(true);
+	}
 	
-        setLocation(975, 0);
-		//setLocation(50, 50);
-        //setSize(600, 850);
-        
-		setSize(390, 740);
-        setTitle("NoCats");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	public static CatpointGui create()
+	{
+		if(cpg == null)
+			cpg = new CatpointGui();
+
+		return cpg;
+	}
+
+	class CatpointController extends JFrame
+	{
+    	//private SecurityRepository securityRepository;
+	
+		private SecurityService securityService;
+	
+    	private DisplayPanel displayPanel;
+    	private SensorPanel sensorPanel;
+
+		private FeedDisplayControlPanel feedDisplayControlPanel;
+		private ControlPanel controlPanel;
+
+		//private FeedDisplayWindow fdw;
+	
+		private JFrame sensorPanelWindow;
+
+    	private CatpointController(SecurityService securityService)
+		{
+			//this.securityRepository = new PretendDatabaseSecurityRepositoryImpl();
 		
-		try( InputStream is = getClass().getClassLoader().getResourceAsStream("no-cats.jpeg") )
-		{
-			ImageIcon icon = new ImageIcon( is.readAllBytes() );
-			setIconImage( icon.getImage() );
-		}
-		catch(Exception exp)
-		{
-			Logger log = LoggerFactory.getLogger(CatpointGui.class);
-			log.info("No Icon", exp);
-		}
-
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new MigLayout());
-        mainPanel.add(displayPanel, "wrap");
-        mainPanel.add(feedDisplayControlPanel, "wrap");
-        mainPanel.add(controlPanel, "wrap");
-        //mainPanel.add(controlPanel);
-        mainPanel.add(sensorPanel);
-
-        getContentPane().add(mainPanel);
+			//this.securityService = new SecurityService(securityRepository);
+			
+			this.securityService = securityService;
+		
+			this.displayPanel = new DisplayPanel(securityService);
+    		this.sensorPanel = new SensorPanel(securityService);
+			this.feedDisplayControlPanel = new FeedDisplayControlPanel(securityService);
+			this.controlPanel = new ControlPanel(securityService);
+	
+        	setLocation(975, 0);
+			//setLocation(50, 50);
+        	//setSize(600, 850);
         
-        //sensorPanelWindow = new JFrame("Sensor Panel");
-        //sensorPanelWindow.getContentPane().add(sensorPanel);
-    }
+			setSize(390, 740);
+        	setTitle("NoCats");
+        	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+			try( InputStream is = getClass().getClassLoader().getResourceAsStream("no-cats.jpeg") )
+			{
+				ImageIcon icon = new ImageIcon( is.readAllBytes() );
+				setIconImage( icon.getImage() );
+			}
+			catch(Exception exp)
+			{
+				Logger log = LoggerFactory.getLogger(CatpointGui.class);
+				log.info("No Icon", exp);
+			}
+
+        	JPanel mainPanel = new JPanel();
+        	mainPanel.setLayout(new MigLayout());
+        	mainPanel.add(displayPanel, "wrap");
+        	mainPanel.add(feedDisplayControlPanel, "wrap");
+        	mainPanel.add(controlPanel, "wrap");
+        	//mainPanel.add(controlPanel);
+        	mainPanel.add(sensorPanel);
+
+        	getContentPane().add(mainPanel);
+        
+        	//sensorPanelWindow = new JFrame("Sensor Panel");
+        	//sensorPanelWindow.getContentPane().add(sensorPanel);
+    	}
     
-    public JFrame getFeedDisplay() {
-    	return fdw.getDisplayFrame();
+    	/*public JFrame getFeedDisplay() {
+    		return fdw.getDisplayFrame();
+    	}*/
     }
 }

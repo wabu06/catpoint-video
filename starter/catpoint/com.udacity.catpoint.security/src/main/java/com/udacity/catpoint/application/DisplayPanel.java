@@ -99,4 +99,7 @@ public class DisplayPanel extends JPanel implements StatusListener {
     
     @Override
     public void setFeedDisplayTitle() {}
+    
+    @Override
+    public void showOrHideFeedDisplay() {}
 }

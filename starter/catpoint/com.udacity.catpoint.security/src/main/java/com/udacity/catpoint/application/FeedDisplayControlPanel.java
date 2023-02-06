@@ -29,7 +29,7 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener
 {
     private SecurityService securityService;
     
-    private FeedDisplayWindow fdw;
+    //private FeedDisplayWindow fdw;
     
 	private JPanel headerPanel;
 	private JPanel camPanel;
@@ -42,7 +42,7 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener
 	
 	//private Random RNG = new Random( Instant.now().toEpochMilli() );
 
-    public FeedDisplayControlPanel(SecurityService securityService, FeedDisplayWindow fdw)
+    public FeedDisplayControlPanel(SecurityService securityService)
 	{
         super();
 		
@@ -51,7 +51,7 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener
         this.securityService = securityService;
         securityService.addStatusListener(this);
         
-        this.fdw = fdw;
+        //this.fdw = fdw;
 
 		panelHeader = new JLabel("APP Control"); panelHeader.setFont(StyleService.HEADING_FONT);
 
@@ -59,12 +59,7 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener
 
         this.showFeedButton = new JButton("Show/Hide Feed Display Window");
         
-        showFeedButton.addActionListener( e -> {
-												if( fdw.getDisplayFrame().isVisible() )
-													fdw.getDisplayFrame().setVisible(false);
-												else
-													fdw.getDisplayFrame().setVisible(true);
-						 					  });
+        showFeedButton.addActionListener( e -> securityService.getStatusListeners().forEach( sl -> sl.showOrHideFeedDisplay() ));
 		
 		JComboBox imgDetector = new JComboBox( new String[] {"FAKE", "OPENCV"} );
         imgDetector.setSelectedItem( securityService.getDetectionService() );
@@ -149,4 +144,7 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener
     
     @Override
     public void setFeedDisplayTitle() {}
+    
+    @Override
+    public void showOrHideFeedDisplay() {}
 }
