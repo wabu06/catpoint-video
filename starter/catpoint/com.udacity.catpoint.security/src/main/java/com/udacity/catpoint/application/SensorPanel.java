@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 
 //import java.util.UUID;
 
@@ -102,7 +103,14 @@ public class SensorPanel extends JPanel implements StatusListener
     
     private void updateFeedSelection(ActionEvent event, Sensor sensor)
     {
+    	ArrayBlockingQueue<Mat> feedFrameBuffer = securityService.getFeedFrameBuffer();
+    	
     	Sensor curfeed = securityService.getCurrentSenorFeed();
+    	
+    	if(curfeed != null)
+			securityService.getSensorFeeds().get(curfeed).setFeedFrameBuffer(null); // disconnect current feed
+    	
+    	securityService.getSensorFeeds().get(sensor).setFeedFrameBuffer(feedFrameBuffer); // connect new feed
     	
     	securityService.selectFeed(sensor);
     	securityService.getStatusListeners().forEach( sl -> sl.setFeedDisplayTitle(sensor) );

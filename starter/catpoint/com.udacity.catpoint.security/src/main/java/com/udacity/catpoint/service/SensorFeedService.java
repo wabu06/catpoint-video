@@ -72,7 +72,7 @@ public class SensorFeedService
 		show = false;
 		feed = true;
 		
-		this.feedFrameBuffer = ss.getFeedFrameBuffer();
+		this.feedFrameBuffer = null; //ss.getFeedFrameBuffer();
 
 		sensorAlarmStatus = AlarmStatus.NO_ALARM;
 		
@@ -102,6 +102,14 @@ public class SensorFeedService
 	
 	private void getFeedSource() {
 		feedSource = "cameraFeeds/feed" + securityService.getRandNum() + ".mp4";
+	}
+	
+	public void setFeedFrameBuffer(ArrayBlockingQueue<Mat> ffb) {
+		this.feedFrameBuffer = ffb;
+	}
+	
+	public ArrayBlockingQueue<Mat> getFeedFrameBuffer() {
+		return this.feedFrameBuffer;
 	}
 	
 	public void setFeed(boolean feed) { this.feed = feed; }
