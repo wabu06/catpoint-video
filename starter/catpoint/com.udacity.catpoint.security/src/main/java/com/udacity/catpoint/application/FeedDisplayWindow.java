@@ -20,12 +20,16 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.*;
 import org.opencv.imgproc.Imgproc;
 
+import org.slf4j.Logger;
+
 
 public class FeedDisplayWindow implements StatusListener
 {
 	private static FeedDisplayWindow fdw = null;
 	
 	private SecurityService securityService;
+	
+	private Logger log;
 	
 	private static ExecutorService pool;
 	
@@ -42,6 +46,8 @@ public class FeedDisplayWindow implements StatusListener
 	private FeedDisplayWindow(SecurityService securityService)
 	{
 		this.securityService = securityService;
+		
+		log = securityService.getLogger();
 		
 		//this.pool = securityService.getPool();
 		
@@ -181,6 +187,7 @@ public class FeedDisplayWindow implements StatusListener
 				frame = feedFrameBuffer.take();
 			}
 			catch(Exception exp) {
+				log.warn("A Frame Was Dropped, Feed Frame Buffer Read Error!!");
 				continue;
 			}
 					

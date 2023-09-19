@@ -31,12 +31,15 @@ import java.lang.reflect.Proxy;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 
+import org.slf4j.Logger;
 
 
 		// SensorService sfs = new SensorService(new SecurityRepository(), new Sensor(name, type) )
 public class SensorFeedService
 {
 	private SecurityService securityService;
+	
+	private Logger log;
 	
 	private Sensor sensor;
 	private int sensorHash;
@@ -60,6 +63,8 @@ public class SensorFeedService
 	public SensorFeedService(SecurityService ss, Sensor sensor)
 	{
 		this.securityService = ss;
+		
+		log = ss.getLogger();
 
 		this.sensor = sensor;
 		this.sensorHash = sensor.hashCode();
@@ -242,6 +247,7 @@ public class SensorFeedService
 					feedFrameBuffer.put(frame);
 			}
 			catch(Exception exp) {
+				log.warn("A Frame Was Dropped, Feed Frame Buffer Write Error!!");
 				continue;
 			}
 			

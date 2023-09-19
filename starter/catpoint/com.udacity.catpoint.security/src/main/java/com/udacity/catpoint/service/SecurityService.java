@@ -30,6 +30,9 @@ import java.time.Instant;
 import java.util.stream.Stream;
 import java.util.stream.IntStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Service that receives information about changes to the security system. Responsible for
@@ -42,6 +45,8 @@ public class SecurityService
 {
     private SecurityRepository securityRepository;
     private Set<StatusListener> statusListeners = new HashSet<>();
+    
+    private Logger log;
     
     private ArrayBlockingQueue<Mat> feedFrameBuffer = new ArrayBlockingQueue<>(20);
     
@@ -56,12 +61,18 @@ public class SecurityService
 	public SecurityService(SecurityRepository securityRepository)
 	{
         this.securityRepository = securityRepository;
+        
+        log = LoggerFactory.getLogger(SecurityService.class);
 		
 		pool = Executors.newFixedThreadPool​(5);
 		
 		RNG = new Random( Instant.now().toEpochMilli() );
 		
 		initSensorServiceMap();
+    }
+    
+    public Logger getLogger() {
+    	return log;
     }
     
     public ArrayBlockingQueue<Mat> getFeedFrameBuffer() {
