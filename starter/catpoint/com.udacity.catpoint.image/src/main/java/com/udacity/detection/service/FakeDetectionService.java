@@ -61,7 +61,7 @@ public class FakeDetectionService implements DetectionService
 
 		//log.info( String.format("%s %d", "hashCode:", Objects.hashCode(mob) ));
 		
-		log.info( String.format("%s %d %s %d", "frameCount:", frameCount, "periodCount", periodCount) );
+		//log.info( String.format("%s %d %s %d", "frameCount:", frameCount, "periodCount", periodCount) );
 
 		if(frameHash <= 0)
 		{

@@ -4,6 +4,10 @@ package com.udacity.catpoint.application;
 import com.udacity.catpoint.data.*;
 import com.udacity.catpoint.service.*;
 
+import java.util.concurrent.ArrayBlockingQueue;
+
+import java.util.concurrent.ExecutorService;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +27,10 @@ public class FeedDisplayWindow implements StatusListener
 	
 	private SecurityService securityService;
 	
+	private static ExecutorService pool;
+	
+	private ArrayBlockingQueue<Mat> feedFrameBuffer;
+	
 	private int IMAGE_WIDTH = 950; //640;
 	private int IMAGE_HEIGHT = 535; //360; 
 	
@@ -34,6 +42,10 @@ public class FeedDisplayWindow implements StatusListener
 	private FeedDisplayWindow(SecurityService securityService)
 	{
 		this.securityService = securityService;
+		
+		//this.pool = securityService.getPool();
+		
+		this.feedFrameBuffer = securityService.getFeedFrameBuffer();
 		
 		securityService.addStatusListener(this);
 
@@ -73,7 +85,12 @@ public class FeedDisplayWindow implements StatusListener
 	public static FeedDisplayWindow getInstance(SecurityService securityService)
 	{
 		if(fdw == null)
+		{
 			fdw = new FeedDisplayWindow(securityService);
+		
+			pool = securityService.getPool();
+			pool.submit( () -> fdw.showFeed() );
+		}
 		
 		return fdw;
 	}
@@ -147,32 +164,46 @@ public class FeedDisplayWindow implements StatusListener
     }
     
     @Override
-    public void showFeed(Mat frame, int sensorHash)
+    public void showFeed(Mat frame, int sensorHash) {}
+    
+    public void showFeed()
 	{
 		//Imgproc.putText(frame, elapse.toString(), new Point(10, 50), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 255, 255), 2);
 		
-		if( sensorHash != securityService.getSelectedFeed() )
-			return;
+		//if( sensorHash != securityService.getSelectedFeed() )
+			//return;
+			
+		Mat frame = null;
+		
+		while(!pool.isShutdown())
+		{
+			try	{
+				frame = feedFrameBuffer.take();
+			}
+			catch(Exception exp) {
+				continue;
+			}
 					
-		MatOfByte mob = new MatOfByte();
-		Imgcodecs.imencode(".jpg", frame, mob);
+			MatOfByte mob = new MatOfByte();
+			Imgcodecs.imencode(".jpg", frame, mob);
 				
-		byte[] byteArray = mob.toArray(); 
+			byte[] byteArray = mob.toArray(); 
 
 		//InputStream is = new ByteArrayInputStream(byteArray); 
 			
-		try( InputStream is = new ByteArrayInputStream(byteArray) )
-		{
-			BufferedImage buffImg = ImageIO.read(is);
+			try( InputStream is = new ByteArrayInputStream(byteArray) )
+			{
+				BufferedImage buffImg = ImageIO.read(is);
 
-			Image tmp = new ImageIcon(buffImg).getImage();
+				Image tmp = new ImageIcon(buffImg).getImage();
 				
-			displayLabel.setIcon( new ImageIcon( tmp.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH) ) );
+				displayLabel.setIcon( new ImageIcon( tmp.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH) ) );
 					
-			displayLabel.repaint();
-		}
-		catch(Exception exp) {
-			exp.printStackTrace();
+				displayLabel.repaint();
+			}
+			catch(Exception exp) {
+				exp.printStackTrace();
+			}
 		}
 	}
 }

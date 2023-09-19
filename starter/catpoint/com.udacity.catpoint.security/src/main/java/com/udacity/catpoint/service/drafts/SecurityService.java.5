@@ -90,17 +90,28 @@ public class SecurityService
     											sfs.getSensorToggleButton().setEnabled(false);
 												sfs.getShowFeedButton().setEnabled(false);
     										});
-    	unSelectFeed(); //pool.shutdown();
-
+    	unSelectFeed(); pool.shutdown();
+    	
+    	/*getSensors().forEach( (s) -> {
+										SensorFeedService sfs = sensorServiceMap.get(s);
+										sfs.getSensorToggleButton().setEnable(false);
+										sfs.getShowFeedButton().setEnable(false);
+									});*/
+    	
+    	// statusListeners.forEach( sl -> sl.updateSensors() );
     	statusListeners.forEach( sl -> sl.enableAddSensor(false) );
     }
     
     public void startFeeds()
     {
-    	//pool = Executors.newFixedThreadPool​(5);
+    	pool = Executors.newFixedThreadPool​(5);
     	
     	sensorServiceMap.forEach( (s, sfs) -> {
     											sfs.getSensorToggleButton().setEnabled(true);
+												
+												/*if( s.hashCode() == getSelectedFeed() )
+    												sfs.getShowFeedButton.setEnabled(false);
+    											else*/
     											
     											sfs.getShowFeedButton().setEnabled(true);
 												
@@ -108,6 +119,9 @@ public class SecurityService
     											pool.submit( () -> sfs.getAndAnalyzeFeed() );
     										});
     	
+    	// getSensors().forEach( s -> s.setEnable(true) );
+    	
+    	// statusListeners.forEach( sl -> sl.updateSensors() );
     	statusListeners.forEach( sl -> sl.enableAddSensor(true) );
     }
     

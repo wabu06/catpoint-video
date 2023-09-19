@@ -24,6 +24,8 @@ import javax.swing.JOptionPane;
 
 import java.util.UUID;
 
+import java.util.concurrent.ArrayBlockingQueue;
+
 import java.lang.reflect.Proxy;
 
 import javax.swing.JLabel;
@@ -40,6 +42,8 @@ public class SensorFeedService
 	private int sensorHash;
 	
 	private AlarmStatus sensorAlarmStatus;
+	
+	private ArrayBlockingQueue<Mat> feedFrameBuffer;
 	
 	private boolean show, feed;
 	
@@ -62,6 +66,8 @@ public class SensorFeedService
 		
 		show = false;
 		feed = true;
+		
+		this.feedFrameBuffer = ss.getFeedFrameBuffer();
 
 		sensorAlarmStatus = AlarmStatus.NO_ALARM;
 		
@@ -230,7 +236,16 @@ public class SensorFeedService
 
 			processFrame(frame);
 			
-			securityService.getStatusListeners().forEach( sl -> sl.showFeed(frame, sensorHash) );
+			try
+			{
+				if(feedFrameBuffer != null)
+					feedFrameBuffer.put(frame);
+			}
+			catch(Exception exp) {
+				continue;
+			}
+			
+			//securityService.getStatusListeners().forEach( sl -> sl.showFeed(frame, sensorHash) );
 		}
 	}
 }
