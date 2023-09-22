@@ -13,7 +13,7 @@ import java.awt.Color;
 
 import java.util.*;
 //import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 
 import org.opencv.core.Mat;
 
@@ -43,18 +43,22 @@ import org.slf4j.LoggerFactory;
  */
 public class SecurityService
 {
+    public enum Level { INFO, DEBUG, WARN, ERROR } 
+
     private SecurityRepository securityRepository;
     private Set<StatusListener> statusListeners = new HashSet<>();
     
     private Logger log;
     
-    private ArrayBlockingQueue<Mat> feedFrameBuffer = new ArrayBlockingQueue<>(20);
+    private SynchronousQueue<Mat> feedFrameBuffer = new SynchronousQueue<>();
     
     private Map<Sensor, SensorFeedService> sensorServiceMap;
     
     private Random RNG;
     
-    private boolean[] select = new boolean[] {false, false, false, false};
+    private List<Integer> feeds = new ArrayList<>(List.of(1,2,3,4));
+    
+    //private boolean[] select = new boolean[] {false, false, false, false};
     
     private ExecutorService pool;
 
@@ -71,27 +75,36 @@ public class SecurityService
 		initSensorServiceMap();
     }
     
+    public void logMsg(String msg, Level loglevel)
+    {
+    	switch(loglevel)
+    	{
+			case INFO -> log.info(msg);
+			case DEBUG -> log.debug(msg);
+			case WARN -> log.warn(msg);
+			case ERROR -> log.error(msg);
+		};
+    }
+    
     public Logger getLogger() {
     	return log;
     }
     
-    public ArrayBlockingQueue<Mat> getFeedFrameBuffer() {
+    public int getRndFeed()
+    {    
+    	if(feeds.isEmpty())
+    		feeds = new ArrayList<>(List.of(1,2,3,4));
+
+    	Collections.shuffle(feeds);
+    	return feeds.remove(0);
+    }
+    
+    public SynchronousQueue<Mat> getFeedFrameBuffer() {
     	return this.feedFrameBuffer;
     }
     
     public Random getRNG() {
     	return RNG;
-    }
-    
-    public int getRandNum()
-    {
-    	int i;
-    	
-    	do { i = RNG.nextInt(4);  } while( select[i] );
-    	
-    	select[i] = true;
-    	
-    	return i + 1;
     }
     
     public void stopFeeds()
@@ -101,7 +114,10 @@ public class SecurityService
     											sfs.getSensorToggleButton().setEnabled(false);
 												sfs.getShowFeedButton().setEnabled(false);
     										});
-    	unSelectFeed(); //pool.shutdown();
+    	//unSelectFeed(); //pool.shutdown();
+    	sensorServiceMap.get(getCurrentSensorFeed()).setShow(false);
+
+    	setSelectedFeed(null);
 
     	statusListeners.forEach( sl -> sl.enableAddSensor(false) );
     }
@@ -182,20 +198,20 @@ public class SecurityService
     	return statusListeners;
     }
     
-    public int getSelectedFeed() {
+    /*public int getSelectedFeed() {
     	return securityRepository.getSelectedFeed();
+    }*/
+    
+    public Sensor setSelectedFeed(Sensor sensor) {
+    	return securityRepository.setSelectedFeed(sensor);
     }
     
-    public int selectFeed(Sensor sensor) {
-    	return securityRepository.selectFeed(sensor);
-    }
-    
-    public int unSelectFeed() {
+    /*public int unSelectFeed() {
     	return securityRepository.unSelectFeed();
-    }
+    }*/
     
-    public Sensor getCurrentSenorFeed() {
-    	return securityRepository.getCurrentSenorFeed();
+    public Sensor getCurrentSensorFeed() {
+    	return securityRepository.getCurrentSensorFeed();
     }
 
     /**
@@ -231,10 +247,15 @@ public class SecurityService
 
     public void removeSensor(Sensor sensor)
     {
-        if( sensor.hashCode() == getSelectedFeed() )
+        Sensor cSensor = getCurrentSensorFeed();
+        
+        if(cSensor != null)
         {
-        	unSelectFeed();
-        	statusListeners.forEach( sl -> sl.setFeedDisplayTitle() );
+        	if( sensor.hashCode() ==  cSensor.hashCode() )
+        	{
+        		setSelectedFeed(null);
+        		statusListeners.forEach( sl -> sl.setFeedDisplayTitle() );
+        	}
         }
 
         SensorFeedService sfs = sensorServiceMap.remove(sensor);

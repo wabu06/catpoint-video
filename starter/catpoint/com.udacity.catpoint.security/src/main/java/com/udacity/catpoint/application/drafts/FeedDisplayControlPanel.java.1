@@ -90,24 +90,17 @@ public class FeedDisplayControlPanel extends JPanel implements StatusListener
         JButton stopFeeds = new JButton("Disable Feeds");
         
         stopFeeds.addActionListener( e -> {
-        									Map<Sensor, SensorFeedService> ssMap = securityService.getSensorFeeds();
-        									
-        									if(ssMap.size() == 0)
-        										return;
-
-        									boolean feeds = ssMap.values().stream().anyMatch(sfs -> sfs.feedEnabled() );
-
-        									//if( securityService.getPool().isShutdown() )
-        									if(feeds)
-        									{
-        										stopFeeds.setText("Enable Feeds");
-        										securityService.stopFeeds();
-        									}
-        									else
+        									if( securityService.getPool().isShutdown() )
         									{
         										stopFeeds.setText("Disable Feeds");
         										securityService.startFeeds();
         									}
+        									else
+        									{
+        										stopFeeds.setText("Enable Feeds");
+        										securityService.stopFeeds();
+        									}
+        									//stopFeeds.setEnabled(false);
         								});
 
 		add(panelHeader, "span 3, wrap");

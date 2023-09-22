@@ -12,7 +12,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
+//import java.util.concurrent.LinkedTransferQueue;
 
 //import java.util.UUID;
 
@@ -20,8 +20,10 @@ import com.udacity.catpoint.data.*;
 
 import org.opencv.core.Mat;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+//import java.util.concurrent.ExecutorService;
+//import java.util.concurrent.Executors;
+
+//import org.slf4j.Logger;
 
 
 /**
@@ -103,23 +105,23 @@ public class SensorPanel extends JPanel implements StatusListener
     
     private void updateFeedSelection(ActionEvent event, Sensor sensor)
     {
-    	ArrayBlockingQueue<Mat> feedFrameBuffer = securityService.getFeedFrameBuffer();
+    	Sensor curfeed = securityService.getCurrentSensorFeed();
     	
-    	Sensor curfeed = securityService.getCurrentSenorFeed();
+    	//if(securityService.getSensorFeeds().get(sensor).feedEnabled())
+    		//securityService.logMsg("\nsensor feeding", SecurityService.Level.INFO);
     	
-    	if(curfeed != null)
-			securityService.getSensorFeeds().get(curfeed).setFeedFrameBuffer(null); // disconnect current feed
+    	if(curfeed != null) {
+			securityService.getSensorFeeds().get(curfeed).setShow(false); // disconnect current feed
+			securityService.getSensorFeeds().get(curfeed).getShowFeedButton().setEnabled(true);
+		}
+		
+		securityService.getSensorFeeds().get(sensor).setShow(true); // connect new feed
+		
+		securityService.getSensorFeeds().get(sensor).getShowFeedButton().setEnabled(false);
     	
-    	securityService.getSensorFeeds().get(sensor).setFeedFrameBuffer(feedFrameBuffer); // connect new feed
-    	
-    	securityService.selectFeed(sensor);
+    	securityService.setSelectedFeed(sensor);
     	securityService.getStatusListeners().forEach( sl -> sl.setFeedDisplayTitle(sensor) );
-    	
-    	securityService.getSensorFeeds().get(sensor).getShowFeedButton().setEnabled(false);
-    	
-    	if(curfeed != null)
-    		securityService.getSensorFeeds().get(curfeed).getShowFeedButton().setEnabled(true);
-    	
+
     	//updateSensorList(sensorListPanel);
     }
 
@@ -162,16 +164,23 @@ public class SensorPanel extends JPanel implements StatusListener
             JButton sensorRemoveButton = new JButton("Remove Sensor");
             
             //sensorToggleButton.setEnabled(s.isEnabled());
-            
-            if( !securityService.getSensorFeeds().get(s).getFeed() )
+
+            if( !securityService.getSensorFeeds().get(s).feedEnabled() )
             	sensorToggleButton.setEnabled(false);
             
             if( securityService.getPool().isShutdown() )
             	showFeedButton.setEnabled(false);
             else
             {
-            	if( s.hashCode() == securityService.getSelectedFeed() )
-    				showFeedButton.setEnabled(false);
+				Sensor cSensor = securityService.getCurrentSensorFeed();
+            
+            	if(cSensor != null)
+            	{
+            		if( s.hashCode() == cSensor.hashCode() )
+    					showFeedButton.setEnabled(false);
+    				else
+    					showFeedButton.setEnabled(true);
+    			}
     			else
     				showFeedButton.setEnabled(true);
     		}

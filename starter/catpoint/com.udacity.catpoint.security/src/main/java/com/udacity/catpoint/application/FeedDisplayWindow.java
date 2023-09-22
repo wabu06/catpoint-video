@@ -4,7 +4,7 @@ package com.udacity.catpoint.application;
 import com.udacity.catpoint.data.*;
 import com.udacity.catpoint.service.*;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 
 import java.util.concurrent.ExecutorService;
 
@@ -33,7 +33,7 @@ public class FeedDisplayWindow implements StatusListener
 	
 	private static ExecutorService pool;
 	
-	private ArrayBlockingQueue<Mat> feedFrameBuffer;
+	private SynchronousQueue<Mat> feedFrameBuffer;
 	
 	private int IMAGE_WIDTH = 950; //640;
 	private int IMAGE_HEIGHT = 535; //360; 

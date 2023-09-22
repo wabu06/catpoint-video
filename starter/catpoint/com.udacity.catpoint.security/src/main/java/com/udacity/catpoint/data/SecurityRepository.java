@@ -11,9 +11,7 @@ public interface SecurityRepository
     void addSensor(Sensor sensor);
     void removeSensor(Sensor sensor);
     void updateSensor(Sensor sensor);
-    int selectFeed(Sensor sensor);
-    int unSelectFeed();
-    int getSelectedFeed();
+    Sensor setSelectedFeed(Sensor sensor);
     void setArmingStatus(ArmingStatus armingStatus);
     Set<Sensor> getSensors();
     ArmingStatus getArmingStatus();
@@ -22,5 +20,5 @@ public interface SecurityRepository
 	String getState();
 	void setDetectionService(String ds);
 	String getDetectionService();
-	Sensor getCurrentSenorFeed();
+	Sensor getCurrentSensorFeed();
 }

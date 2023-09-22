@@ -22,8 +22,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     private ArmingStatus prevArmingStatus;
     
     private String detectionService, restore;
-    
-    private int sensorHash; // feed of sensor that is to be displayed
+
     private Sensor curfeed; // sensor who's feed is currently being displayed
 
     	//preference keys
@@ -76,8 +75,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
             Type type = new TypeToken<Set<Sensor>>() {}.getType(); 
             sensors = gson.fromJson(sensorString, type);
         }
-        
-        sensorHash = -1;
+
         curfeed = null;
     }
 
@@ -103,28 +101,13 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     }
     
     @Override
-    public int selectFeed(Sensor sensor) {
-    	sensorHash = sensor.hashCode();
+    public Sensor setSelectedFeed(Sensor sensor) {
     	curfeed = sensor;
-    	return sensorHash;
+    	return sensor;
     }
     
     @Override
-    public int unSelectFeed()
-    {
-    	int hash = sensorHash;
-    	sensorHash = -1;
-    	curfeed = null;
-    	return hash;
-    }
-    
-    @Override
-    public int getSelectedFeed() {
-    	return sensorHash;
-    }
-    
-    @Override
-    public Sensor getCurrentSenorFeed() {
+    public Sensor getCurrentSensorFeed() {
     	return curfeed;
     }
 
