@@ -24,6 +24,8 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     private String detectionService, restore;
 
     private Sensor curfeed; // sensor who's feed is currently being displayed
+    
+    private boolean feeds;
 
     	//preference keys
     private static final String SENSORS = "SENSORS";
@@ -77,6 +79,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
         }
 
         curfeed = null;
+        feeds = true;
     }
 
     @Override
@@ -156,4 +159,14 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     
     @Override
     public String getState() { return this.restore; }
+    
+    @Override
+    public void setFeeds(boolean feeds) {
+    	this.feeds = feeds;
+    }
+    
+    @Override
+    public boolean feedsEnabled() {
+    	return feeds;
+    }
 }

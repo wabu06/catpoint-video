@@ -218,8 +218,8 @@ public class SensorFeedService
 	
 	private void processFrame(Mat frame)
     {
-    	if( !sensor.getActive() )
-			return;
+    	//if( !sensor.getActive() )
+			//return;
 
         catDetected(detectionService.frameContainsCat(frame, 50.0f)); // OpencvDetectService(Mat frame, confidenceThreshhold)
    	}
@@ -247,7 +247,8 @@ public class SensorFeedService
 				continue;
 			}
 
-			processFrame(frame);
+			if( sensor.getActive() )
+				processFrame(frame);
 			
 			if(show)
 			{ 

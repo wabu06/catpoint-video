@@ -23,4 +23,5 @@ public interface StatusListener
     void setFeedDisplayTitle(Sensor sensor);
     void setFeedDisplayTitle();
     void showOrHideFeedDisplay();
+	void stopFeedsEnable(boolean enable);
 }

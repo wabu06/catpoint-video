@@ -170,6 +170,9 @@ public class FeedDisplayWindow implements StatusListener
     }
     
     @Override
+    public void stopFeedsEnable(boolean enable) {}
+    
+    @Override
     public void showFeed(Mat frame, int sensorHash) {}
     
     public void showFeed()

@@ -120,4 +120,7 @@ public class ControlPanel extends JPanel implements StatusListener
     
     @Override
     public void showOrHideFeedDisplay() {}
+    
+    @Override
+    public void stopFeedsEnable(boolean enable) {}
 }

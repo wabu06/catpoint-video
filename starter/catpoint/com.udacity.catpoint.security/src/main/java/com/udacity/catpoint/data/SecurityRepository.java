@@ -21,4 +21,6 @@ public interface SecurityRepository
 	void setDetectionService(String ds);
 	String getDetectionService();
 	Sensor getCurrentSensorFeed();
+	void setFeeds(boolean feeds);
+	boolean feedsEnabled();
 }

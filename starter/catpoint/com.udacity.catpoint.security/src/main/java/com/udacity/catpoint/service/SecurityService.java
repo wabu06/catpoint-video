@@ -115,7 +115,10 @@ public class SecurityService
 												sfs.getShowFeedButton().setEnabled(false);
     										});
     	//unSelectFeed(); //pool.shutdown();
-    	sensorServiceMap.get(getCurrentSensorFeed()).setShow(false);
+    	Sensor sensor = getCurrentSensorFeed();
+    	
+    	if(sensor != null)
+    		sensorServiceMap.get(sensor).setShow(false);
 
     	setSelectedFeed(null);
 
@@ -173,7 +176,10 @@ public class SecurityService
 			sensorServiceMap.forEach( (s, sfs) -> sfs.setSensorAlarmStatus(AlarmStatus.NO_ALARM) );
 			getSensors().forEach( s -> s.setActive(Boolean.FALSE) );
 			
-			statusListeners.forEach( sl -> sl.updateSensors() );
+			boolean feeds = sensorServiceMap.values().stream().anyMatch(sfs -> sfs.feedEnabled() );
+			
+			if(feeds)
+				statusListeners.forEach( sl -> sl.updateSensors() );
 			//statusListeners.forEach( sl -> sl.sensorStatusChanged() );
 		}
 
@@ -282,5 +288,13 @@ public class SecurityService
 	public void setState(String restore) { securityRepository.setState(restore); }
 	
 	public String getState() { return securityRepository.getState(); }
+
+    public void setFeeds(boolean feeds) {
+    	securityRepository.setFeeds(feeds);
+    }
+    
+    public boolean feedsEnabled() {
+    	return securityRepository.feedsEnabled();
+    }
 }
 
